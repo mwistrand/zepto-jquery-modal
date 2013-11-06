@@ -37,7 +37,7 @@ var overlay,
     /**
      *
      */
-    triggerSelector: '.js-triggerModal'
+    triggerClass: 'js-triggerModal'
   },
   
   initialize = function(triggers, options) {
@@ -48,30 +48,74 @@ var overlay,
         this.show(null, 0);
       } else {
         this.triggers = triggers;
-        this.attach();
+        this.attach(triggers);
       }
     }
   },
 
   modalProto = {
-    attach: function() {
-      var ns = this.options.eventNamespace + 'Modal:showEvent',
-        sel = this.options.triggerSelector,
-        callback = $.proxy(function(e) {
-          var trigger = $(e.target);
+    attach: (function() {
 
-          if (!trigger.is(sel)) {
-            trigger = trigger.parent(sel).eq(0);
-          }
+      function clickEvent(e) {
+        var trigger = $(e.target),
+          cssClass = this.options.triggerClass;
 
-          if (trigger.length) {
-            e.preventDefault();
+        if (!trigger.hasClass(cssClass)) {
+          trigger = trigger.parent('.' + cssClass).eq(0);
+        }
 
-            this.show(trigger);
-          }
-        }, this);
+        if (trigger.length) {
+          e.preventDefault();
 
-      this.triggers.on('click.' + ns, sel, callback);
+          this.show(trigger);
+        }
+      }
+
+      return function(triggers) {
+        var ns = this.options.eventNamespace + 'Modal:showEvent',
+          sel = '.' + this.options.triggerClass,
+          callback = $.proxy(clickEvent, this);
+        
+        triggers.on('click.' + ns, sel, callback);
+      };
+    })(),
+
+    /**
+     * Detaches events from the passed-in trigger(s), or detaches all of
+     * the `modal` instance events if no triggers are passed in.
+     *
+     * @param triggers The `$` element(s) from which to remove events.
+     */
+    detach: function(triggers) {
+      var ns = this.options.eventNamespace + 'Modal:showEvent';
+
+      if (triggers) {
+        triggers.removeClass(this.options.triggerClass);
+      } else {
+        triggers = this.triggers;
+      }
+
+      triggers.off('click.' + ns);
+    },
+
+    /**
+     * Adds new triggers to `this.triggers` and attaches events. If
+     * `isDelegate` is deliberately set to `false`, then it is assumed
+     * that the passed-in triggers are child elements of existing triggers.
+     *
+     * @param triggers The new elements that will trigger modals.
+     * @param isDelegate Ignored by default. If set to Boolean `false`, then
+     *        no click event will be added, just `this.options.triggerClass`.
+     */
+    add: function(triggers, isDelegate) {
+
+      if (this.triggers && isDelegate === false) {
+        triggers.addClass(this.options.triggerClass);
+      } else {
+        this.triggers = this.triggers? this.triggers.add(triggers) : triggers;
+        
+        this.attach(triggers);
+      }
     },
 
     loadModal: function(trigger, i) {
@@ -115,7 +159,7 @@ ns.modal = function(triggers, options) {
   }
 
   instance = Object.create(proto);
-
+  
   initialize.call(instance, triggers, options);
 
   return instance;

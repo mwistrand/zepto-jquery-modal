@@ -1,15 +1,28 @@
 describe('Zepto-Compatible jQuery Modal Box', function() {
 
   describe('Common Functionality', function() {
-    var instance;
+    var instance,
+      triggers,
+      modals;
 
     beforeEach(function() {
       instance = u$.modal();
-      loadFixtures('immediate.html');
+      loadFixtures('static.html');
+      triggers = $('.js-triggerModal');
+      modals = $('.js-modal');
     });
 
     it('Does not trigger anything on load', function() {
       expect($('.js-modal')).toHaveClass('is-invisible');
+    });
+
+    it('Adds triggers to the instance', function() {
+      var trigger = triggers.eq(0);
+
+      instance.add($(document.body));
+      trigger.trigger('click');
+
+      expect($('.js-modal').eq(0)).not.toHaveClass('is-invisible');
     });
   });
 
@@ -42,6 +55,23 @@ describe('Zepto-Compatible jQuery Modal Box', function() {
       loadFixtures('static.html');
 
       modalInstance = u$.modal($(document.body));
+    });
+
+    it('Detaches the click event from a trigger', function() {
+      var triggers = $('.js-triggerModal'),
+        modal = $('.js-modal').eq(0);
+
+      // detach events from an element
+      modalInstance.detach(triggers.eq(0));
+      triggers.eq(0).trigger('click');
+      expect(modal).toHaveClass('is-invisible');
+    });
+
+    it('Detaches all instance events', function() {
+      modalInstance.detach();
+
+      $('.js-triggerModal').eq(0).trigger('click');
+      expect($('.js-modal')).toHaveClass('is-invisible');
     });
 
     it('Displays the appropriate modal when a trigger is clicked', function() {
