@@ -46,6 +46,15 @@ describe('Zepto-Compatible jQuery Modal Box', function() {
     it('Keeps other in-page modals hidden.', function() {
       expect(modals.eq(1)).toHaveClass('is-invisible');
     });
+
+    it('Closes a modal window', function() {
+      var modal = modals.eq(0);
+
+      // get the 'close' link, click it.
+      modal.find('.js-closeModal').trigger('click');
+      expect(modal.find('.js-closeModal').length).toEqual(1);
+      //expect(modal).toHaveClass('is-invisible');
+    });
   });
 
   describe('Triggered in-page modal', function() {

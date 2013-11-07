@@ -7,8 +7,18 @@ ns || (ns = window);
 
 var overlay,
 
+  // Only one modal will be open at a time, and we'll keep track
+  // of that modal here for all instances...
+  current,
+
   defaults = {
     
+    /**
+     * The class name for any element that will cause the current
+     * modal to be closed.
+     */
+    closeClass: 'js-closeModal',
+
     /**
      * The prefix for the event namespace. The namespace is generated
      * as follows: `eventNamespace + 'Modal:' + name + 'Event'`
@@ -43,6 +53,10 @@ var overlay,
   initialize = function(triggers, options) {
     this.options = $.extend({}, defaults, (options || null));
 
+    // The only event that will always be attached is the
+    // "close modal" event.
+    this.attachModalEvents();
+
     if (triggers || this.options.modals) {
       if (triggers === null) {
         this.show(null, 0);
@@ -56,7 +70,7 @@ var overlay,
   setEvent = (function() {
 
     var callbacks = {
-      'show': function(e) {
+      show: function(e) {
         var trigger = $(e.target),
           cssClass = this.options.triggerClass;
 
@@ -69,6 +83,12 @@ var overlay,
 
           this.show(trigger);
         }
+      },
+
+      close: function(e) {
+        e.preventDefault();
+
+        this.hide();
       }
     };
 
@@ -83,6 +103,11 @@ var overlay,
   modalProto = {
     attach: function(triggers) {
       setEvent.call(this, 'show', triggers, '.' + this.options.triggerClass);
+    },
+
+    attachModalEvents: function() {
+      setEvent.call(this, 'close', $(document.body),
+          '.' + this.options.closeClass);
     },
 
     /**
@@ -142,7 +167,15 @@ var overlay,
     show: function(trigger, i) {
       var modal = this.loadModal(trigger, i);
 
+      current = modal;
+
       modal.removeClass('is-invisible');
+    },
+
+    hide: function() {
+      current && current.addClass('is-invisible');
+
+      current = null;
     }
   },
 
