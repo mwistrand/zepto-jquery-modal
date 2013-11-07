@@ -22,19 +22,19 @@ describe('Zepto-Compatible jQuery Modal Box', function() {
       instance.add($(document.body));
       trigger.trigger('click');
 
-      expect($('.js-modal').eq(0)).not.toHaveClass('is-invisible');
+      expect(modals.eq(0)).not.toHaveClass('is-invisible');
     });
   });
 
   describe('Immediately-invoked in-page modal', function() {
-    var modalInstance,
+    var instance,
       modals;
 
     beforeEach(function() {
       loadFixtures('immediate.html');
 
       modals = $('.js-modal');
-      modalInstance = u$.modal({
+      instance = u$.modal({
         modals: modals
       });
     });
@@ -52,18 +52,30 @@ describe('Zepto-Compatible jQuery Modal Box', function() {
 
       // get the 'close' link, click it.
       modal.find('.js-closeModal').trigger('click');
-      expect(modal.find('.js-closeModal').length).toEqual(1);
-      //expect(modal).toHaveClass('is-invisible');
+      
+      expect(modal).toHaveClass('is-invisible');
+    });
+
+    it('Destroys the modal on close', function() {
+      var modal = modals.eq(0);
+
+      instance.options.destroyOnClose = true;
+
+      setTimeout(function() {
+        modal.find('.js-closeModal').trigger('click');
+
+        expect(modal).toBeEmpty();
+      }, 50);
     });
   });
 
   describe('Triggered in-page modal', function() {
-    var modalInstance;
+    var instance;
 
     beforeEach(function() {
       loadFixtures('static.html');
 
-      modalInstance = u$.modal($(document.body));
+      instance = u$.modal($(document.body));
     });
 
     it('Detaches the click event from a trigger', function() {
@@ -71,13 +83,13 @@ describe('Zepto-Compatible jQuery Modal Box', function() {
         modal = $('.js-modal').eq(0);
 
       // detach events from an element
-      modalInstance.detach(triggers.eq(0));
+      instance.detach(triggers.eq(0));
       triggers.eq(0).trigger('click');
       expect(modal).toHaveClass('is-invisible');
     });
 
     it('Detaches all instance events', function() {
-      modalInstance.detach();
+      instance.detach();
 
       $('.js-triggerModal').eq(0).trigger('click');
       expect($('.js-modal')).toHaveClass('is-invisible');

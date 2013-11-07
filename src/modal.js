@@ -20,6 +20,12 @@ var overlay,
     closeClass: 'js-closeModal',
 
     /**
+     * Should the current modal window be completely removed
+     * from the DOM when closed?
+     */
+    destroyOnClose: false,
+
+    /**
      * The prefix for the event namespace. The namespace is generated
      * as follows: `eventNamespace + 'Modal:' + name + 'Event'`
      * For example, 'myAppModal:showEvent'.
@@ -173,7 +179,15 @@ var overlay,
     },
 
     hide: function() {
-      current && current.addClass('is-invisible');
+
+      if (current) {
+
+        if (this.options.destroyOnClose) {
+          current.empty().remove();
+        } else {
+          current.addClass('is-invisible');
+        }
+      }
 
       current = null;
     }
