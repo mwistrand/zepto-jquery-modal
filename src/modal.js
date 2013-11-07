@@ -53,10 +53,10 @@ var overlay,
     }
   },
 
-  modalProto = {
-    attach: (function() {
+  setEvent = (function() {
 
-      function clickEvent(e) {
+    var callbacks = {
+      'show': function(e) {
         var trigger = $(e.target),
           cssClass = this.options.triggerClass;
 
@@ -70,15 +70,20 @@ var overlay,
           this.show(trigger);
         }
       }
+    };
 
-      return function(triggers) {
-        var ns = this.options.eventNamespace + 'Modal:showEvent',
-          sel = '.' + this.options.triggerClass,
-          callback = $.proxy(clickEvent, this);
-        
-        triggers.on('click.' + ns, sel, callback);
-      };
-    })(),
+    return function(name, elems, sel) {
+      var ns = this.options.eventNamespace + 'Modal:' + name + 'Event',
+        callback = $.proxy(callbacks[name], this);
+      
+      elems.on('click.' + ns, sel, callback);
+    };
+  })(),
+
+  modalProto = {
+    attach: function(triggers) {
+      setEvent.call(this, 'show', triggers, '.' + this.options.triggerClass);
+    },
 
     /**
      * Detaches events from the passed-in trigger(s), or detaches all of
