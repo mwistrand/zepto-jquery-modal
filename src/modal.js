@@ -51,7 +51,7 @@ var overlay,
     modals: null,
 
     /**
-     *
+     * The CSS class applied to all modals.
      */
     triggerClass: 'js-triggerModal'
   },
@@ -99,7 +99,7 @@ var overlay,
     };
 
     return function(name, elems, sel) {
-      var ns = this.options.eventNamespace + 'Modal:' + name + 'Event',
+      var ns = (this.options.eventNamespace || '') + 'Modal:' + name + 'Event',
         callback = $.proxy(callbacks[name], this);
       
       elems.on('click.' + ns, sel, callback);
@@ -123,15 +123,19 @@ var overlay,
      * @param triggers The `$` element(s) from which to remove events.
      */
     detach: function(triggers) {
-      var ns = this.options.eventNamespace + 'Modal:showEvent';
+      var ns = (this.options.eventNamespace || '') + 'Modal:';//showEvent';
 
       if (triggers) {
         triggers.removeClass(this.options.triggerClass);
       } else {
         triggers = this.triggers;
+        this.triggers = null;
+        this.modals = null;
+
+        $(document.body).off('click.' + ns + 'closeEvent');
       }
 
-      triggers.off('click.' + ns);
+      triggers && triggers.off('click.' + ns + 'showEvent');
     },
 
     /**
