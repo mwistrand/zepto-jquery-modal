@@ -1,6 +1,7 @@
 describe('Zepto-Compatible jQuery Modal Box', function() {
   var triggers,
-    modals;
+    modals,
+    instance;
 
   beforeEach(function() {
     loadFixtures('static.html');
@@ -10,6 +11,10 @@ describe('Zepto-Compatible jQuery Modal Box', function() {
   afterEach(function() {
     triggers.empty().remove();
     modals.empty().remove();
+
+    // `instance` is created in the `beforeEach` block of each
+    // nested `describe` block.
+    instance.detach();
   });
 
   function triggerClose(i) {
@@ -23,7 +28,7 @@ describe('Zepto-Compatible jQuery Modal Box', function() {
   }
 
   it('detaches all events', function() {
-    var instance = u$.modal($(document.body));
+    instance = u$.modal($(document.body));
     
     spyOn(instance, 'hide');
     instance.detach();
@@ -36,15 +41,10 @@ describe('Zepto-Compatible jQuery Modal Box', function() {
   });
 
   describe('A modal', function() {
-    var instance;
-
     beforeEach(function() {
       instance = u$.modal({
         modals: modals
       });
-    });
-    afterEach(function() {
-      instance.detach();
     });
 
     it('can be closed', function() {
@@ -69,13 +69,8 @@ describe('Zepto-Compatible jQuery Modal Box', function() {
   });
 
   describe('A blank instance', function() {
-    var instance;
-
     beforeEach(function() {
       instance = u$.modal();
-    });
-    afterEach(function() {
-      instance.detach();
     });
 
     it('does not trigger anything on load', function() {
@@ -93,13 +88,8 @@ describe('Zepto-Compatible jQuery Modal Box', function() {
   });
 
   describe('A modal trigger', function() {
-    var instance;
-
     beforeEach(function() {
       instance = u$.modal($(document.body));
-    });
-    afterEach(function() {
-      instance.detach();
     });
 
     it('can display a modal when clicked', function() {
