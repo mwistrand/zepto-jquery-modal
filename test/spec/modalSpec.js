@@ -1,22 +1,88 @@
 describe('Zepto-Compatible jQuery Modal Box', function() {
+  var triggers,
+    modals;
 
-  describe('Common Functionality', function() {
-    var instance,
-      triggers,
-      modals;
+  beforeEach(function() {
+    loadFixtures('static.html');
+    triggers = $('.js-triggerModal');
+    modals = $('.js-modal');
+  });
+  afterEach(function() {
+    triggers.empty().remove();
+    modals.empty().remove();
+  });
+
+  function triggerClose(i) {
+    i || (i = 0);
+    modals.eq(i).find('.js-closeModal').eq(0).trigger('click');
+  }
+
+  function triggerOpen(i) {
+    i || (i = 0);
+    triggers.eq(i).trigger('click');
+  }
+
+  it('detaches all events', function() {
+    var instance = u$.modal($(document.body));
+    
+    spyOn(instance, 'hide');
+    instance.detach();
+
+    expect(instance.triggers).toBe(null);
+    expect(instance.modals).toBe(null);
+
+    triggerClose();
+    expect(instance.hide).not.toHaveBeenCalled();
+  });
+
+  describe('A modal', function() {
+    var instance;
+
+    beforeEach(function() {
+      instance = u$.modal({
+        modals: modals
+      });
+    });
+    afterEach(function() {
+      instance.detach();
+    });
+
+    it('can be closed', function() {
+      triggerClose();
+
+      expect(modals.eq(0)).toHaveClass('is-invisible');
+    });
+
+    it('can be destroyed on close', function() {
+      instance.options.destroyOnClose = true;
+      triggerClose();
+      expect(modals.eq(0).html()).toEqual('');
+    });
+
+    it('can be opened when an instance is created', function() {
+      expect(modals.eq(0)).not.toHaveClass('is-invisible');
+    });
+
+    it('can remain hidden if it is not the first modal', function() {
+      expect(modals.eq(1)).toHaveClass('is-invisible');
+    });
+  });
+
+  describe('A blank instance', function() {
+    var instance;
 
     beforeEach(function() {
       instance = u$.modal();
-      loadFixtures('static.html');
-      triggers = $('.js-triggerModal');
-      modals = $('.js-modal');
+    });
+    afterEach(function() {
+      instance.detach();
     });
 
-    it('Does not trigger anything on load', function() {
+    it('does not trigger anything on load', function() {
       expect($('.js-modal')).toHaveClass('is-invisible');
     });
 
-    it('Adds triggers to the instance', function() {
+    it('can add triggers to the instance', function() {
       var trigger = triggers.eq(0);
 
       instance.add($(document.body));
@@ -26,79 +92,26 @@ describe('Zepto-Compatible jQuery Modal Box', function() {
     });
   });
 
-  describe('Immediately-invoked in-page modal', function() {
-    var instance,
-      modals;
-
-    beforeEach(function() {
-      loadFixtures('immediate.html');
-
-      modals = $('.js-modal');
-      instance = u$.modal({
-        modals: modals
-      });
-    });
-
-    it('Unhides the first modal', function() {
-      expect(modals.eq(0)).not.toHaveClass('is-invisible');
-    });
-
-    it('Keeps other in-page modals hidden.', function() {
-      expect(modals.eq(1)).toHaveClass('is-invisible');
-    });
-
-    it('Closes a modal window', function() {
-      var modal = modals.eq(0);
-
-      // get the 'close' link, click it.
-      modal.find('.js-closeModal').trigger('click');
-      
-      expect(modal).toHaveClass('is-invisible');
-    });
-
-    it('Destroys the modal on close', function() {
-      var modal = modals.eq(0);
-
-      instance.options.destroyOnClose = true;
-
-      setTimeout(function() {
-        modal.find('.js-closeModal').trigger('click');
-
-        expect(modal).toBeEmpty();
-      }, 50);
-    });
-  });
-
-  describe('Triggered in-page modal', function() {
+  describe('A modal trigger', function() {
     var instance;
 
     beforeEach(function() {
-      loadFixtures('static.html');
-
       instance = u$.modal($(document.body));
     });
-
-    it('Detaches the click event from a trigger', function() {
-      var triggers = $('.js-triggerModal'),
-        modal = $('.js-modal').eq(0);
-
-      // detach events from an element
-      instance.detach(triggers.eq(0));
-      triggers.eq(0).trigger('click');
-      expect(modal).toHaveClass('is-invisible');
-    });
-
-    it('Detaches all instance events', function() {
+    afterEach(function() {
       instance.detach();
-
-      $('.js-triggerModal').eq(0).trigger('click');
-      expect($('.js-modal')).toHaveClass('is-invisible');
     });
 
-    it('Displays the appropriate modal when a trigger is clicked', function() {
-      $('.js-triggerModal').eq(0).trigger('click');
+    it('can display a modal when clicked', function() {
+      triggerOpen();
 
-      expect($('.js-modal').eq(0)).not.toHaveClass('is-invisible');
+      expect(modals.eq(0)).not.toHaveClass('is-invisible');
     });
+
+    it('can be removed from the instance', function() {
+      instance.detach(triggers.eq(0));
+      triggerOpen();
+      expect(modals.eq(0)).toHaveClass('is-invisible');
+    })
   });
 });
