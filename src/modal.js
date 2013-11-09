@@ -11,6 +11,10 @@ var overlay,
   // of that modal here for all instances...
   current,
 
+  isInstanceOf$ = function(obj) {
+    return (window.Zepto) ? $.zepto.isZ(obj) : (obj instanceof $);
+  },
+
   defaults = {
     
     /**
@@ -73,10 +77,50 @@ var overlay,
     }
   },
 
+  // Creates a `$` object from an array/string of data
+  // and injects it into the optional parent.
+  renderElement = function(info, parent, prepend) {
+    var elem = $.isArray(info) ? $.apply($, info) : $(info),
+      method = prepend ? 'prependTo' : 'appendTo';
+
+    if (parent) {
+      elem[method](parent);
+    }
+
+    return elem;
+  },
+
+  // Used by `ajaxModalProto`. Provides basic template rendering capabilities.
+  // 
+  // Usage:
+  //   `var template = '<div data-id="{{id}}">{{title}}</div>',
+  //     data = [{'id': 12345, 'title': 'Lorem ipsum dolor sit amet'}];
+  //   render(template, data, $('#container'));
+  //
+  render = (function() {
+    var pattern = /\{\{([A-Za-z0-9\-_]+)\}\}/i;
+
+    return function(template, data, container) {
+      container.html('');
+
+      data.forEach(function(item) {
+        var html = template.replace(pattern, function(matched, key) {
+          var replacement = item[key];
+
+          return replacement || '';
+        });
+
+        if (html.length) {
+          $(html).appendTo(container);
+        }
+      });
+    };
+  })(),
+
   setEvent = (function() {
 
     var callbacks = {
-      show: function(e) {
+      /*show: function(e) {
         var trigger = $(e.target),
           cssClass = this.options.triggerClass;
 
@@ -85,6 +129,25 @@ var overlay,
         }
 
         if (trigger.length) {
+          e.preventDefault();
+
+          this.show(trigger);
+        }
+      },*/
+
+      show: function(e) {
+        var trigger = $(e.target),
+          cssClass = this.options.triggerClass,
+          show = true;
+
+        if ($.isFunction(cssClass)) {
+          show = cssClass(trigger);
+        } else if (!trigger.hasClass(cssClass)) {
+          trigger = trigger.parent('.' + cssClass).eq(0);
+          show = !!trigger.length;
+        }
+
+        if (show) {
           e.preventDefault();
 
           this.show(trigger);
@@ -171,6 +234,7 @@ var overlay,
         this.modals || (this.modals = $(this.options.modals));
         modal = this.modals.eq(index);
       }
+
       return modal;
     },
 
@@ -198,14 +262,14 @@ var overlay,
   },
 
   ajaxModalProto = $.extend({}, modalProto, {
-
+    
   });
 
 ns.modal = function(triggers, options) {
   var proto = modalProto,
     instance;
 
-  if (!(triggers instanceof $)) {
+  if (!isInstanceOf$(triggers)) {
     options = triggers;
     triggers = null;
   }

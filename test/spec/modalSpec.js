@@ -102,6 +102,16 @@ describe('Zepto-Compatible jQuery Modal Box', function() {
       instance.detach(triggers.eq(0));
       triggerOpen();
       expect(modals.eq(0)).toHaveClass('is-invisible');
-    })
+    });
+
+    it('can trigger a modal when `options.triggerClass` is a function',
+        function() {
+      instance.options.triggerClass = function(trigger) {
+        return trigger.hasClass('js-triggerModal');
+      };
+
+      triggers.eq(0).trigger('click');
+      expect(modals.eq(0)).not.toHaveClass('is-invisible');
+    });
   });
 });
