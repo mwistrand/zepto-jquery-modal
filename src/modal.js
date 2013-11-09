@@ -1,6 +1,5 @@
 window.u$ || (window.u$ = {});
 
-(function($, window, document, ns, eventProto) {
 (function($, window, document, ns) {
 'use strict';
 
@@ -76,11 +75,9 @@ var overlay,
     // "close modal" event.
     this.attachModalEvents();
 
-    if (triggers || this.options.modals) {
+    if (triggers || this.options.modals || this.options.url) {
       if (triggers === null) {
-        this.show(null, 0);
-        this.show(this.loadModal(null, 0));
-        this.show(this.loadModal(null, 0), null);
+        this.load(null, 0);
       } else {
         this.triggers = triggers;
         this.attach(triggers);
@@ -161,9 +158,8 @@ var overlay,
         if (show) {
           e.preventDefault();
 
-          this.show(trigger);
-          this.show(this.loadModal(trigger));
-          this.show(this.loadModal(trigger), trigger);
+          //this.show(this.loadModal(trigger), trigger);
+          this.load(trigger);
         }
       },
 
@@ -234,7 +230,7 @@ var overlay,
       }
     },
 
-    loadModal: function(trigger, i) {
+    load: function(trigger, i) {
       var index = trigger ? trigger.data('modalindex') : i,
         modal;
 
@@ -248,7 +244,7 @@ var overlay,
         modal = this.modals.eq(index);
       }
 
-      return modal;
+      this.show(modal, trigger);
     },
 
     show: function(modal, trigger) {
@@ -277,7 +273,7 @@ var overlay,
   },
 
   ajaxModalProto = $.extend({}, modalProto, {
-    
+    show: function() {}
   });
 
 ns.modal = function(triggers, options) {
@@ -294,7 +290,11 @@ ns.modal = function(triggers, options) {
   }
 
   instance = Object.create(proto);
-  
+
+  if (options && options.events) {
+    $.extend(instance, options.events);
+  }
+
   initialize.call(instance, triggers, options);
 
   return instance;

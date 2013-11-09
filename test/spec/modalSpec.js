@@ -134,4 +134,21 @@ describe('Zepto-Compatible jQuery Modal Box', function() {
       expect(modals.eq(0)).not.toHaveClass('is-invisible');
     });
   });
+
+  describe('An Ajax Modal', function() {
+    var html = '<div data-id="12345">Lorem ipsum dolor sit amet</div>';
+
+    beforeEach(function() {
+      instance = u$.modal($(document.body), {
+        url: '../fixtures/json/modal.json',
+        template: '<div data-id="{{id}}">{{text}}</div>'
+      });
+    });
+
+    /*it('can be generated with JSON', function() {
+      triggers.eq(0).trigger('click');
+
+      expect(instance.modals).toBeDefined();
+    });*/
+  });
 });
