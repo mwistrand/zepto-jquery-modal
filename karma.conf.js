@@ -9,13 +9,14 @@ module.exports = function(config) {
     // list of files / patterns to load in the browser
     files: [
       // serve html fixtures
-      { pattern: "test/fixtures/*.html", watched: true, served: true, included: false },
+      { pattern: "test/fixtures/**/*.html", watched: true, served: true, included: false },
 
       // dependencies
       "src/lib/jquery.min.js",
 
       // test helper code
       "test/helpers/jasmine-jquery.js",
+      "test/helpers/mock-ajax.js",
 
       // set jasmine fixtures path
       // includes only this line: jasmine.getFixtures().fixturesPath = "base/test/fixtures/";
