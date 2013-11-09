@@ -8,11 +8,14 @@ module.exports = function(config) {
 
     // list of files / patterns to load in the browser
     files: [
-      // serve html fixtures
-      { pattern: "test/fixtures/**/*.html", watched: true, served: true, included: false },
+      // serve html and json fixtures
+      { pattern: "test/fixtures/*.html", watched: true, served: true, included: false },
+      { pattern: "test/fixtures/json/*.json", watched: true, served: true, included: false },
 
       // dependencies
       "src/lib/jquery.min.js",
+      "src/lib/underscore.js",
+      "src/lib/backbone.js",
 
       // test helper code
       "test/helpers/jasmine-jquery.js",

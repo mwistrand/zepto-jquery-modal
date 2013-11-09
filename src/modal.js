@@ -1,6 +1,7 @@
 window.u$ || (window.u$ = {});
 
 (function($, window, document, ns, eventProto) {
+(function($, window, document, ns) {
 'use strict';
 
 ns || (ns = window);
@@ -37,6 +38,14 @@ var overlay,
     eventNamespace: null,
 
     /**
+     * A Backbone style events object that will be integrated
+     * with the `modal` object (on instantiation, via `$.extend`).
+     * Any such object must implement a `trigger` function in order
+     * to function properly.
+     */
+    events: null,
+
+    /**
      * Either the existing modal `$` elements, a selector to fetch
      * existing modals from the DOM, or an HTML string that will be
      * passed to `$`, or an array of data that will be passed to `$`
@@ -71,6 +80,7 @@ var overlay,
       if (triggers === null) {
         this.show(null, 0);
         this.show(this.loadModal(null, 0));
+        this.show(this.loadModal(null, 0), null);
       } else {
         this.triggers = triggers;
         this.attach(triggers);
@@ -153,6 +163,7 @@ var overlay,
 
           this.show(trigger);
           this.show(this.loadModal(trigger));
+          this.show(this.loadModal(trigger), trigger);
         }
       },
 
@@ -240,10 +251,7 @@ var overlay,
       return modal;
     },
 
-    show: function(trigger, i) {
-      var modal = this.loadModal(trigger, i);
-
-    show: function(modal) {
+    show: function(modal, trigger) {
       current = modal;
 
       modal.removeClass('is-invisible');

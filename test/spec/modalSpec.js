@@ -40,6 +40,26 @@ describe('Zepto-Compatible jQuery Modal Box', function() {
     expect(instance.hide).not.toHaveBeenCalled();
   });
 
+  describe('Event Emitter', function() {
+    var onShow;
+
+    beforeEach(function() {
+      onShow = jasmine.createSpy('onShow');
+ 
+      instance = u$.modal({
+        events: Backbone.Events
+      });
+
+      instance.on('show', onShow);
+    });
+
+    it('can take a Backbone-style events object', function() {
+      instance.show(modals.eq(0));
+
+      expect(onShow).toHaveBeenCalled();
+    });
+  });
+
   describe('A modal', function() {
     beforeEach(function() {
       instance = u$.modal({
