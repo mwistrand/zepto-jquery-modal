@@ -70,6 +70,7 @@ var overlay,
     if (triggers || this.options.modals) {
       if (triggers === null) {
         this.show(null, 0);
+        this.show(this.loadModal(null, 0));
       } else {
         this.triggers = triggers;
         this.attach(triggers);
@@ -151,6 +152,7 @@ var overlay,
           e.preventDefault();
 
           this.show(trigger);
+          this.show(this.loadModal(trigger));
         }
       },
 
@@ -241,9 +243,14 @@ var overlay,
     show: function(trigger, i) {
       var modal = this.loadModal(trigger, i);
 
+    show: function(modal) {
       current = modal;
 
       modal.removeClass('is-invisible');
+
+      if (this.options.events) {
+        this.trigger('show', modal, trigger);
+      }
     },
 
     hide: function() {
