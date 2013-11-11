@@ -13,9 +13,10 @@ module.exports = function(config) {
       { pattern: "test/fixtures/json/*.json", watched: true, served: true, included: false },
 
       // dependencies
-      "src/lib/jquery.min.js",
-      "src/lib/underscore.js",
-      "src/lib/backbone.js",
+      "lib/jquery.min.js",
+      "lib/underscore.js",
+      "lib/backbone.js",
+      "lib/handlebars.js",
 
       // test helper code
       "test/helpers/jasmine-jquery.js",

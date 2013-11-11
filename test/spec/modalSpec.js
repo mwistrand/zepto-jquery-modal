@@ -174,11 +174,34 @@ describe('Zepto-Compatible jQuery Modal Box', function() {
 
       spyOn($, 'ajax').andCallFake(function(params) {
         params.success(null, null, {responseText: html});
-      })
+      });
 
       triggerOpen();
 
       expect(instance.modals.eq(0).html()).toEqual(html);
+    });
+
+    it('can be generated from a template function', function() {
+      var div;
+      
+      appendLoadFixtures('template.html');
+
+      instance.options.template = function(container, data) {
+        var source = $('#handlebars-template').html(),
+          template = Handlebars.compile(source);
+
+        container.html(template(data));
+      };
+
+      spyOn($, 'ajax').andCallFake(function(params) {
+        params.success(null, null, {responseText: jsonObj});
+      });
+
+      triggerOpen();
+
+      div = instance.modals.eq(0).find('div');
+      expect(div.data('id')).toEqual(12345);
+      expect(div.text()).toEqual('Test modal contents');
     });
   });
 });

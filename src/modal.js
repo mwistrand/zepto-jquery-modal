@@ -67,10 +67,10 @@ var overlay,
      */
     triggerClass: 'js-triggerModal'
   },
-  
+  instanceI = 0,
   initialize = function(triggers, options) {
     this.options = $.extend({}, this.options, (options || null));
-
+this._i = ++instanceI;
     // The only event that will always be attached is the
     // "close modal" event.
     this.attachModalEvents();
@@ -166,7 +166,6 @@ var overlay,
         if (show) {
           e.preventDefault();
 
-          //this.show(this.loadModal(trigger), trigger);
           this.load(trigger);
         }
       },
@@ -289,6 +288,7 @@ var overlay,
       }],
 
       // responseType: 'json', /* default; or 'HTML'*/
+      // template: '<div>{{field}}</div>' || function(container, data) {}
     }),
 
     load: function(trigger) {
@@ -311,9 +311,14 @@ var overlay,
     },
 
     renderJSON: function(modal, json) {
-      var obj = $.parseJSON(json);
+      var obj = $.parseJSON(json),
+        template = this.options.template;
 
-      render(this.options.template, obj, modal);
+      if ($.isFunction(template)) {
+        template(modal, obj);
+      } else {
+        render(template, obj, modal);
+      }
     },
     
     renderHTML: function(modal, response) {
