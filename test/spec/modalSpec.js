@@ -168,5 +168,17 @@ describe('Zepto-Compatible jQuery Modal Box', function() {
 
       expect(instance.modals.eq(0).html()).toEqual(html);
     });
+
+    it('can be generated from an HTML string', function() {
+      instance.options.responseType = 'html';
+
+      spyOn($, 'ajax').andCallFake(function(params) {
+        params.success(null, null, {responseText: html});
+      })
+
+      triggerOpen();
+
+      expect(instance.modals.eq(0).html()).toEqual(html);
+    });
   });
 });

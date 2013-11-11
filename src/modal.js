@@ -286,7 +286,9 @@ var overlay,
     options: $.extend({}, defaults, {
       modals: ['<div />', {
         'class': 'js-modal'
-      }]
+      }],
+
+      // responseType: 'json', /* default; or 'HTML'*/
     }),
 
     load: function(trigger) {
@@ -300,10 +302,12 @@ var overlay,
     },
 
     show: function(response) {
+      var method = 'render' + ((this.options.responseType === 'html') ?
+          'HTML' : 'JSON');
       this.modals || (this.modals = renderElement(this.options.modals,
           $(document.body)));
 
-      this.renderJSON(this.modals.eq(0), response);
+      this[method](this.modals.eq(0), response);
     },
 
     renderJSON: function(modal, json) {
