@@ -67,10 +67,10 @@ var overlay,
      */
     triggerClass: 'js-triggerModal'
   },
-  instanceI = 0,
+
   initialize = function(triggers, options) {
     this.options = $.extend({}, this.options, (options || null));
-this._i = ++instanceI;
+
     // The only event that will always be attached is the
     // "close modal" event.
     this.attachModalEvents();
@@ -283,22 +283,49 @@ this._i = ++instanceI;
 
   ajaxModalProto = $.extend({}, modalProto, {
     options: $.extend({}, defaults, {
+      // responseType: 'json', /* default; or 'HTML'*/
+      // query: '' || function(trigger) {},
+      // template: '<div>{{field}}</div>' || function(container, data) {}
+
+      cache: true,
       modals: ['<div />', {
         'class': 'js-modal'
-      }],
-
-      // responseType: 'json', /* default; or 'HTML'*/
-      // template: '<div>{{field}}</div>' || function(container, data) {}
+      }]
     }),
 
+    setCache: function(key, data) {
+
+      if (this.options.cache) {
+        this._cache || (this._cache = {});
+        this._cache[key] = data;
+      }
+    },
+
+    getCache: function(key) {
+      return this._cache && this._cache[key] || null;
+    },
+
     load: function(trigger) {
-      
-      $.ajax({
-        url: this.options.url,
-        success: function(data, status, xhr) {
-          this.show(xhr.responseText);
-        }.bind(this)
-      });
+      var query = this.options.query,
+        cache;
+
+      if ($.isFunction(query)) {
+        query = query(trigger);
+      }
+
+      cache = this.getCache(query);
+
+      if (cache) {
+        this.show(cache);
+      } else {
+        $.ajax({
+          url: this.options.url,
+          success: function(data, status, xhr) {
+            this.setCache(query, xhr.responseText);
+            this.show(xhr.responseText);
+          }.bind(this)
+        });
+      }
     },
 
     show: function(response) {

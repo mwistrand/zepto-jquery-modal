@@ -203,5 +203,28 @@ describe('Zepto-Compatible jQuery Modal Box', function() {
       expect(div.data('id')).toEqual(12345);
       expect(div.text()).toEqual('Test modal contents');
     });
+
+    it('can be rendered from the cache', function() {
+      var i = 0,
+        modal;
+
+      spyOn($, 'ajax').andCallFake(function(params) {
+        i += 1;
+        params.success(null, null, {responseText: jsonObj});
+      });
+
+      // 1. Load modal HTML from AJAX data
+      // 2. Close the modal
+      // 3. Clear out the modal HTML
+      // 4. Reload the modal from cache
+      triggerOpen();
+      triggerClose();
+      
+      modal = instance.modals.eq(0).html('');
+      triggerOpen();
+
+      expect(i).toBe(1);
+      expect(modal.html()).toEqual(html);
+    });
   });
 });
