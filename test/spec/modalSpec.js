@@ -51,14 +51,23 @@ describe('Zepto-Compatible jQuery Modal Box', function() {
       instance = u$.modal({
         events: Backbone.Events
       });
-
-      instance.on('show', onShow);
     });
 
     it('can take a Backbone-style events object', function() {
+      instance.on('show', onShow);
+
       instance.show(modals.eq(0));
 
       expect(onShow).toHaveBeenCalled();
+    });
+
+    it('can emit a callback set in the options', function() {
+      instance.options.events = null;
+      instance.options.onShow = onShow;
+
+      instance.show(modals.eq(0));
+      
+      expect(onShow).toHaveBeenCalled()
     });
   });
 

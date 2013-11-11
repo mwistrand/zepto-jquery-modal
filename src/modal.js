@@ -83,6 +83,8 @@ var overlay,
         this.attach(triggers);
       }
     }
+
+    //this.emit('init', triggers);
   },
 
   // Creates a `$` object from an array/string of data
@@ -204,12 +206,14 @@ var overlay,
      * @param triggers The `$` element(s) from which to remove events.
      */
     detach: function(triggers) {
-      var ns = (this.options.eventNamespace || '') + 'Modal:';//showEvent';
+      var ns = (this.options.eventNamespace || '') + 'Modal:',
+        modals;
 
       if (triggers) {
         triggers.removeClass(this.options.triggerClass);
       } else {
         triggers = this.triggers;
+        modals = this.modals;
         this.triggers = null;
         this.modals = null;
 
@@ -217,6 +221,8 @@ var overlay,
       }
 
       triggers && triggers.off('click.' + ns + 'showEvent');
+
+      //this.emit('detach', modals, triggers);
     },
 
     /**
@@ -257,27 +263,38 @@ var overlay,
     },
 
     show: function(modal, trigger) {
+      //this.emit('beforeShow', modal, trigger, overlay);
       current = modal;
-
       modal.removeClass('is-invisible');
-
-      if (this.options.events) {
-        this.trigger('show', modal, trigger);
-      }
+      this.emit('show', modal, trigger, overlay);
     },
 
     hide: function() {
 
       if (current) {
+        //this.emit('beforeHide', current, overlay);
 
         if (this.options.destroyOnClose) {
           current.empty().remove();
         } else {
           current.addClass('is-invisible');
         }
+
+        //this.emit('hide', current, overlay);
       }
 
       current = null;
+    },
+
+    emit: function(name) {
+      var events = this.options.events,
+        start = events ? 0 : 1,
+        method = events ? this.trigger : this.options['on' +
+            name.charAt(0).toUpperCase() + name.slice(1)];
+
+      if ($.isFunction(method)) {
+        method.apply(this, [].slice.call(arguments, start));
+      }
     }
   },
 
@@ -321,9 +338,15 @@ var overlay,
         $.ajax({
           url: this.options.url,
           data: query,
+          beforeSend: function(xhr, settings) {
+            //this.emit('beforeSend', trigger, xhr, settings);
+          }.bind(this),
           success: function(data, status, xhr) {
             this.setCache(query, xhr.responseText);
             this.show(xhr.responseText);
+          }.bind(this),
+          error: function(xhr, errorType, error) {
+            //this.emit('ajaxError', trigger, xhr, errorType, error);
           }.bind(this)
         });
       }
@@ -331,11 +354,17 @@ var overlay,
 
     show: function(response) {
       var method = 'render' + ((this.options.responseType === 'html') ?
-          'HTML' : 'JSON');
+          'HTML' : 'JSON'),
+        modal;
+
       this.modals || (this.modals = renderElement(this.options.modals,
           $(document.body)));
 
-      this[method](this.modals.eq(0), response);
+      modal = this.modals.eq(0);
+
+      //this.emit('beforeShow', modal, trigger, response);
+      this[method](modal, response);
+      //this.emit('show', modal, trigger, response);
     },
 
     renderJSON: function(modal, json) {
