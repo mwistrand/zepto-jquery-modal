@@ -19,7 +19,6 @@ module.exports = function(config) {
 
       // test helper code
       "test/helpers/jasmine-jquery.js",
-      "test/helpers/mock-ajax.js",
 
       // set jasmine fixtures path
       // includes only this line: jasmine.getFixtures().fixturesPath = "base/test/fixtures/";

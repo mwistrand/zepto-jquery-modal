@@ -1,4 +1,6 @@
 describe('Zepto-Compatible jQuery Modal Box', function() {
+  'use strict';
+
   var triggers,
     modals,
     instance;
@@ -136,7 +138,9 @@ describe('Zepto-Compatible jQuery Modal Box', function() {
   });
 
   describe('An Ajax Modal', function() {
-    var html = '<div data-id="12345">Lorem ipsum dolor sit amet</div>';
+    var html = '<div data-id="12345">Test modal contents</div>',
+      jsonObj = '{"id": 12345, "text": "Test modal contents"}',
+      jsonArr = '[{"id": 12345,"text": "Test modal contents"}]';
 
     beforeEach(function() {
       instance = u$.modal($(document.body), {
@@ -145,10 +149,24 @@ describe('Zepto-Compatible jQuery Modal Box', function() {
       });
     });
 
-    /*it('can be generated with JSON', function() {
-      triggers.eq(0).trigger('click');
+    it('can be generated with a JSON Array', function() {
+      spyOn($, 'ajax').andCallFake(function(params) {
+        params.success(null, null, {responseText: jsonArr});
+      });
 
-      expect(instance.modals).toBeDefined();
-    });*/
+      triggerOpen();
+
+      expect(instance.modals.eq(0).html()).toEqual(html);
+    });
+
+    it('can be generated with a JSON Object', function() {
+      spyOn($, 'ajax').andCallFake(function(params) {
+        params.success(null, null, {responseText: jsonObj});
+      });
+
+      triggerOpen();
+
+      expect(instance.modals.eq(0).html()).toEqual(html);
+    });
   });
 });

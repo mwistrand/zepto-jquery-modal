@@ -54,7 +54,7 @@ var overlay,
      * - OR -
         `modals: $('.js-modal')`
      * - OR -
-        `modals: ['div', {
+        `modals: ['<div />', {
           'class': 'js-modal'
         }]`
      * - OR -
@@ -69,7 +69,7 @@ var overlay,
   },
   
   initialize = function(triggers, options) {
-    this.options = $.extend({}, defaults, (options || null));
+    this.options = $.extend({}, this.options, (options || null));
 
     // The only event that will always be attached is the
     // "close modal" event.
@@ -106,22 +106,30 @@ var overlay,
   //   render(template, data, $('#container'));
   //
   render = (function() {
-    var pattern = /\{\{([A-Za-z0-9\-_]+)\}\}/i;
+    var pattern = /\{\{([A-Za-z0-9\-_]+)\}\}/gi;
+
+    function setHTML(template, item, container) {
+      var html = template.replace(pattern, function(matched, key) {
+        var replacement = item[key];
+
+        return replacement || '';
+      });
+
+      if (html.length) {
+        $(html).appendTo(container);
+      }
+    }
 
     return function(template, data, container) {
       container.html('');
 
-      data.forEach(function(item) {
-        var html = template.replace(pattern, function(matched, key) {
-          var replacement = item[key];
-
-          return replacement || '';
+      if ($.isArray(data)) {
+        data.forEach(function(item) {
+          setHTML(template, item, container);
         });
-
-        if (html.length) {
-          $(html).appendTo(container);
-        }
-      });
+      } else {
+        setHTML(template, data, container);
+      }
     };
   })(),
 
@@ -179,6 +187,8 @@ var overlay,
   })(),
 
   modalProto = {
+    options: defaults,
+
     attach: function(triggers) {
       setEvent.call(this, 'show', triggers, '.' + this.options.triggerClass);
     },
@@ -273,7 +283,38 @@ var overlay,
   },
 
   ajaxModalProto = $.extend({}, modalProto, {
-    show: function() {}
+    options: $.extend({}, defaults, {
+      modals: ['<div />', {
+        'class': 'js-modal'
+      }]
+    }),
+
+    load: function(trigger) {
+      
+      $.ajax({
+        url: this.options.url,
+        success: function(data, status, xhr) {
+          this.show(xhr.responseText);
+        }.bind(this)
+      });
+    },
+
+    show: function(response) {
+      this.modals || (this.modals = renderElement(this.options.modals,
+          $(document.body)));
+
+      this.renderJSON(this.modals.eq(0), response);
+    },
+
+    renderJSON: function(modal, json) {
+      var obj = $.parseJSON(json);
+
+      render(this.options.template, obj, modal);
+    },
+    
+    renderHTML: function(modal, response) {
+      modal.html(response);
+    }
   });
 
 ns.modal = function(triggers, options) {
