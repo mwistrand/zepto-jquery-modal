@@ -320,6 +320,7 @@ var overlay,
       } else {
         $.ajax({
           url: this.options.url,
+          data: query,
           success: function(data, status, xhr) {
             this.setCache(query, xhr.responseText);
             this.show(xhr.responseText);
