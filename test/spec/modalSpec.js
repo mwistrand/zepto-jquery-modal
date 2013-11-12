@@ -32,14 +32,14 @@ describe('Zepto-Compatible jQuery Modal Box', function() {
   it('detaches all events', function() {
     instance = u$.modal($(document.body));
     
-    spyOn(instance, 'hide');
+    spyOn(instance, 'show');
     instance.detach();
 
     expect(instance.triggers).toBe(null);
     expect(instance.modals).toBe(null);
 
-    triggerClose();
-    expect(instance.hide).not.toHaveBeenCalled();
+    triggerOpen();
+    expect(instance.show).not.toHaveBeenCalled();
   });
 
   describe('Event Emitter', function() {
@@ -87,6 +87,7 @@ describe('Zepto-Compatible jQuery Modal Box', function() {
     it('can be destroyed on close', function() {
       instance.options.destroyOnClose = true;
       triggerClose();
+
       expect(modals.eq(0).html()).toEqual('');
     });
 
@@ -96,6 +97,20 @@ describe('Zepto-Compatible jQuery Modal Box', function() {
 
     it('can remain hidden if it is not the first modal', function() {
       expect(modals.eq(1)).toHaveClass('is-invisible');
+    });
+
+    it('can be displayed as a lightbox', function() {
+      expect($('.js-overlay').length).toEqual(1);
+    });
+
+    it('can be displayed without an overlay', function() {
+      instance.detach();
+      instance = u$.modal({
+        modals: modals,
+        isLightbox: false
+      });
+
+      expect($('.js-overlay')).toHaveClass('is-invisible');
     });
   });
 
@@ -113,6 +128,27 @@ describe('Zepto-Compatible jQuery Modal Box', function() {
 
       instance.add($(document.body));
       trigger.trigger('click');
+
+      expect(modals.eq(0)).not.toHaveClass('is-invisible');
+    });
+  });
+
+  describe('An overlay', function() {
+    beforeEach(function() {
+      instance = u$.modal($(document.body));
+    });
+
+    it('can be clicked to close a modal', function() {
+      triggerOpen();
+      $('.js-overlay').trigger('click');
+
+      expect(modals.eq(0)).toHaveClass('is-invisible');
+    });
+
+    it('can remain open when the overlay is clicked', function() {
+      instance.options.clickOverlayToClose = false;
+      triggerOpen();
+      $('.js-overlay').trigger('click');
 
       expect(modals.eq(0)).not.toHaveClass('is-invisible');
     });

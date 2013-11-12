@@ -16,6 +16,11 @@ var overlay,
   },
 
   defaults = {
+
+    /**
+     * If this is `true`, the modal can be closed by clicking the overlay.
+     */
+     clickOverlayToClose: true,
     
     /**
      * The class name for any element that will cause the current
@@ -45,6 +50,11 @@ var overlay,
     events: null,
 
     /**
+     * Will this be displayed with the overlay?
+     */
+    isLightbox: true,
+
+    /**
      * Either the existing modal `$` elements, a selector to fetch
      * existing modals from the DOM, or an HTML string that will be
      * passed to `$`, or an array of data that will be passed to `$`
@@ -61,6 +71,16 @@ var overlay,
         `modals: '<div class="modal"></div>'`
      */
     modals: null,
+
+    /**
+     * The data that will be used to create the overlay element.
+     * Can be an HTML string, or an array of arguments to pass to `$`:
+     *
+       `overlayParams: ['<div />', {'class': 'overlay'}]
+     *
+     * The class `js-overlay` will be added to this element.
+     */
+    overlayParams: '<div class="overlay"></div>',
 
     /**
      * The CSS class applied to all modals.
@@ -83,8 +103,6 @@ var overlay,
         this.attach(triggers);
       }
     }
-
-    //this.emit('init', triggers);
   },
 
   // Creates a `$` object from an array/string of data
@@ -138,20 +156,18 @@ var overlay,
   setEvent = (function() {
 
     var callbacks = {
-      /*show: function(e) {
-        var trigger = $(e.target),
-          cssClass = this.options.triggerClass;
+      clickOverlay: function() {
 
-        if (!trigger.hasClass(cssClass)) {
-          trigger = trigger.parent('.' + cssClass).eq(0);
+        if (overlay.data('clickToClose')) {
+          this.hide();
         }
+      },
 
-        if (trigger.length) {
-          e.preventDefault();
+      close: function(e) {
+        e.preventDefault();
 
-          this.show(trigger);
-        }
-      },*/
+        this.hide();
+      },
 
       show: function(e) {
         var trigger = $(e.target),
@@ -170,12 +186,6 @@ var overlay,
 
           this.load(trigger);
         }
-      },
-
-      close: function(e) {
-        e.preventDefault();
-
-        this.hide();
       }
     };
 
@@ -195,8 +205,10 @@ var overlay,
     },
 
     attachModalEvents: function() {
-      setEvent.call(this, 'close', $(document.body),
-          '.' + this.options.closeClass);
+      var body = $(document.body);
+
+      setEvent.call(this, 'close', body, '.' + this.options.closeClass);
+      setEvent.call(this, 'clickOverlay', body, '.js-overlay');
     },
 
     /**
@@ -212,6 +224,7 @@ var overlay,
       if (triggers) {
         triggers.removeClass(this.options.triggerClass);
       } else {
+        this.hide();
         triggers = this.triggers;
         modals = this.modals;
         this.triggers = null;
@@ -222,7 +235,7 @@ var overlay,
 
       triggers && triggers.off('click.' + ns + 'showEvent');
 
-      //this.emit('detach', modals, triggers);
+      this.emit('detach', modals, triggers);
     },
 
     /**
@@ -263,16 +276,33 @@ var overlay,
     },
 
     show: function(modal, trigger) {
-      //this.emit('beforeShow', modal, trigger, overlay);
+      this.emit('beforeShow', modal, trigger, overlay);
       current = modal;
       modal.removeClass('is-invisible');
+      this.showOverlay();
       this.emit('show', modal, trigger, overlay);
+    },
+
+    showOverlay: function() {
+
+      if (this.options.isLightbox) {
+
+        if (!overlay) {
+          overlay = renderElement(this.options.overlayParams,
+              document.body);
+
+          overlay.addClass('js-overlay');
+        }
+
+        overlay.removeClass('is-invisible').data('clickToClose',
+            !!this.options.clickOverlayToClose);
+      }
     },
 
     hide: function() {
 
       if (current) {
-        //this.emit('beforeHide', current, overlay);
+        this.emit('beforeHide', current, overlay);
 
         if (this.options.destroyOnClose) {
           current.empty().remove();
@@ -280,7 +310,8 @@ var overlay,
           current.addClass('is-invisible');
         }
 
-        //this.emit('hide', current, overlay);
+        overlay && overlay.addClass('is-invisible');
+        this.emit('hide', current, overlay);
       }
 
       current = null;
@@ -306,7 +337,7 @@ var overlay,
 
       cache: true,
       modals: ['<div />', {
-        'class': 'js-modal'
+        'class': 'modal js-modal'
       }]
     }),
 
@@ -333,26 +364,26 @@ var overlay,
       cache = this.getCache(query);
 
       if (cache) {
-        this.show(cache);
+        this.show(cache, trigger);
       } else {
         $.ajax({
           url: this.options.url,
           data: query,
           beforeSend: function(xhr, settings) {
-            //this.emit('beforeSend', trigger, xhr, settings);
+            this.emit('beforeSend', trigger, xhr, settings);
           }.bind(this),
           success: function(data, status, xhr) {
             this.setCache(query, xhr.responseText);
-            this.show(xhr.responseText);
+            this.show(xhr.responseText, trigger);
           }.bind(this),
           error: function(xhr, errorType, error) {
-            //this.emit('ajaxError', trigger, xhr, errorType, error);
+            this.emit('ajaxError', trigger, xhr, errorType, error);
           }.bind(this)
         });
       }
     },
 
-    show: function(response) {
+    show: function(response, trigger) {
       var method = 'render' + ((this.options.responseType === 'html') ?
           'HTML' : 'JSON'),
         modal;
@@ -362,9 +393,9 @@ var overlay,
 
       modal = this.modals.eq(0);
 
-      //this.emit('beforeShow', modal, trigger, response);
+      this.emit('beforeShow', modal, trigger, response);
       this[method](modal, response);
-      //this.emit('show', modal, trigger, response);
+      this.emit('show', modal, trigger, response);
     },
 
     renderJSON: function(modal, json) {
