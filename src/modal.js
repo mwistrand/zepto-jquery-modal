@@ -21,12 +21,20 @@ var overlay,
      * If this is `true`, the modal can be closed by clicking the overlay.
      */
      clickOverlayToClose: true,
-    
+
     /**
-     * The class name for any element that will cause the current
-     * modal to be closed.
+     * The data that will be used to create the "close" link/button.
+     * Can be an HTML string, or an array of arguments to pass to `$`:
+     *
+       `closeParams: ['<a />', {'class': 'closeModal', text: 'close'}]
+     *
+     * The class `js-closeModal` will be added to this element, which
+     * will be added as the first child to the modal.
+     * If you don't want to use this, set this to null, but then
+     * you'll be responsible for giving users an obvious way to close
+     * the modal.
      */
-    closeClass: 'js-closeModal',
+    closeParams: '<a class="closeModal">close</a>',
 
     /**
      * Should the current modal window be completely removed
@@ -207,7 +215,7 @@ var overlay,
     attachModalEvents: function() {
       var body = $(document.body);
 
-      setEvent.call(this, 'close', body, '.' + this.options.closeClass);
+      setEvent.call(this, 'close', body, '.js-closeModal');
       setEvent.call(this, 'clickOverlay', body, '.js-overlay');
     },
 
@@ -231,6 +239,7 @@ var overlay,
         this.modals = null;
 
         $(document.body).off('click.' + ns + 'closeEvent');
+        $(document.body).off('click.' + ns + 'clickOverlayEvent');
       }
 
       triggers && triggers.off('click.' + ns + 'showEvent');
@@ -305,6 +314,7 @@ var overlay,
         this.emit('beforeHide', current, overlay);
 
         if (this.options.destroyOnClose) {
+          this.modals = this.modals.not(current);
           current.empty().remove();
         } else {
           current.addClass('is-invisible');
@@ -391,7 +401,7 @@ var overlay,
       this.modals || (this.modals = renderElement(this.options.modals,
           $(document.body)));
 
-      modal = this.modals.eq(0);
+      current = modal = this.modals.eq(0);
 
       this.emit('beforeShow', modal, trigger, response);
       this[method](modal, response);

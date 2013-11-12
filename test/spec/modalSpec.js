@@ -29,9 +29,18 @@ describe('Zepto-Compatible jQuery Modal Box', function() {
     triggers.eq(i).trigger('click');
   }
 
+  function clickOverlay() {
+    $('.js-overlay').trigger('click');
+  }
+
   it('detaches all events', function() {
     instance = u$.modal($(document.body));
-    
+
+    // open and close the modal so the overlay is
+    // actually available
+    triggerOpen();
+    triggerClose();
+
     spyOn(instance, 'show');
     instance.detach();
 
@@ -40,6 +49,10 @@ describe('Zepto-Compatible jQuery Modal Box', function() {
 
     triggerOpen();
     expect(instance.show).not.toHaveBeenCalled();
+
+    spyOn(instance, 'hide');
+    clickOverlay();
+    expect(instance.hide).not.toHaveBeenCalled();
   });
 
   describe('Event Emitter', function() {
@@ -192,6 +205,29 @@ describe('Zepto-Compatible jQuery Modal Box', function() {
         url: '../fixtures/json/modal.json',
         template: '<div data-id="{{id}}">{{text}}</div>'
       });
+    });
+
+    it('can be destroyed on close', function() {
+      instance.options.destroyOnClose = true;
+      spyOn($, 'ajax').andCallFake(function(params) {
+        params.success(null, null, {responseText: jsonArr});
+      });
+
+      triggerOpen();
+      triggerClose();
+
+      expect(instance.modals.length).toEqual(0);
+    });
+
+    it('can be closed', function() {
+      spyOn($, 'ajax').andCallFake(function(params) {
+        params.success(null, null, {responseText: jsonArr});
+      });
+
+      triggerOpen();
+      triggerClose();
+
+      expect(instance.modals.eq(0)).toHaveClass('is-invisible');
     });
 
     it('can be generated with a JSON Array', function() {
