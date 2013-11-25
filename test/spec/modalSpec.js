@@ -1,3 +1,13 @@
+/**
+ * Tests not run:
+ * 
+ * # Is a close button automatically injected?
+ * Since the `static.html` fixture does not include close
+ * buttons, the tests provided to make sure the modal can
+ * be closed implicitly require a close button to be
+ * automatically included.
+ */
+
 describe('Zepto-Compatible jQuery Modal Box', function() {
   'use strict';
 
@@ -5,15 +15,8 @@ describe('Zepto-Compatible jQuery Modal Box', function() {
     modals,
     instance;
 
-  beforeEach(function() {
-    loadFixtures('static.html');
-    triggers = $('.js-triggerModal');
-    modals = $('.js-modal');
-  });
   afterEach(function() {
-    triggers.empty().remove();
-    modals.empty().remove();
-
+    
     // `instance` is created in the `beforeEach` block of each
     // nested `describe` block.
     instance.detach();
@@ -33,26 +36,47 @@ describe('Zepto-Compatible jQuery Modal Box', function() {
     $('.js-overlay').trigger('click');
   }
 
-  it('detaches all events', function() {
-    instance = u$.modal($(document.body));
+  function before() {
+    loadFixtures('static.html');
+    triggers = $('.js-triggerModal');
+    modals = $('.js-modal');
+  }
 
-    // open and close the modal so the overlay is
-    // actually available
-    triggerOpen();
-    triggerClose();
+  function after() {
+    triggers.empty().remove();
+    modals.empty().remove();
+  }
 
-    spyOn(instance, 'show');
-    instance.detach();
+  describe('An instance', function() {
 
-    expect(instance.triggers).toBe(null);
-    expect(instance.modals).toBe(null);
+    beforeEach(function() {
+      before();
+    });
+    afterEach(function() {
+      after();
+    });
 
-    triggerOpen();
-    expect(instance.show).not.toHaveBeenCalled();
+    it('can detach all events', function() {
+      instance = u$.modal($(document.body));
 
-    spyOn(instance, 'hide');
-    clickOverlay();
-    expect(instance.hide).not.toHaveBeenCalled();
+      // open and close the modal so the overlay is
+      // actually available
+      triggerOpen();
+      triggerClose();
+
+      spyOn(instance, 'show');
+      instance.detach();
+
+      expect(instance.triggers).toBe(null);
+      expect(instance.modals).toBe(null);
+
+      triggerOpen();
+      expect(instance.show).not.toHaveBeenCalled();
+
+      spyOn(instance, 'hide');
+      clickOverlay();
+      expect(instance.hide).not.toHaveBeenCalled();
+    });
   });
 
   describe('Event Emitter', function() {
@@ -86,9 +110,14 @@ describe('Zepto-Compatible jQuery Modal Box', function() {
 
   describe('A modal', function() {
     beforeEach(function() {
+      before();
+
       instance = u$.modal({
         modals: modals
       });
+    });
+    afterEach(function() {
+      after();
     });
 
     it('can be closed', function() {
@@ -129,7 +158,12 @@ describe('Zepto-Compatible jQuery Modal Box', function() {
 
   describe('A blank instance', function() {
     beforeEach(function() {
+      before();
+
       instance = u$.modal();
+    });
+    afterEach(function() {
+      after();
     });
 
     it('does not trigger anything on load', function() {
@@ -148,12 +182,17 @@ describe('Zepto-Compatible jQuery Modal Box', function() {
 
   describe('An overlay', function() {
     beforeEach(function() {
+      before();
+
       instance = u$.modal($(document.body));
+    });
+    afterEach(function() {
+      after();
     });
 
     it('can be clicked to close a modal', function() {
       triggerOpen();
-      $('.js-overlay').trigger('click');
+      clickOverlay();
 
       expect(modals.eq(0)).toHaveClass('is-invisible');
     });
@@ -161,7 +200,7 @@ describe('Zepto-Compatible jQuery Modal Box', function() {
     it('can remain open when the overlay is clicked', function() {
       instance.options.clickOverlayToClose = false;
       triggerOpen();
-      $('.js-overlay').trigger('click');
+      clickOverlay()
 
       expect(modals.eq(0)).not.toHaveClass('is-invisible');
     });
@@ -169,7 +208,12 @@ describe('Zepto-Compatible jQuery Modal Box', function() {
 
   describe('A modal trigger', function() {
     beforeEach(function() {
+      before();
+
       instance = u$.modal($(document.body));
+    });
+    afterEach(function() {
+      after();
     });
 
     it('can display a modal when clicked', function() {
@@ -196,26 +240,36 @@ describe('Zepto-Compatible jQuery Modal Box', function() {
   });
 
   describe('An Ajax Modal', function() {
-    var html = '<div data-id="12345">Test modal contents</div>',
+    var html = '<a class="closeModal js-closeModal">close</a>' +
+        '<div data-id="12345">Test modal contents</div>',
       jsonObj = '{"id": 12345, "text": "Test modal contents"}',
       jsonArr = '[{"id": 12345,"text": "Test modal contents"}]';
 
     beforeEach(function() {
+      triggers = setFixtures('<a class="js-triggerModal">Trigger Modal</a>').
+          find('.js-triggerModal');
       instance = u$.modal($(document.body), {
         url: '../fixtures/json/modal.json',
         template: '<div data-id="{{id}}">{{text}}</div>'
       });
     });
 
+    function openClose(instance) {
+
+      if (instance) {
+        triggerOpen();
+        modals = instance.modals;
+        triggerClose();
+      }
+    }
+
     it('can be destroyed on close', function() {
       instance.options.destroyOnClose = true;
       spyOn($, 'ajax').andCallFake(function(params) {
         params.success(null, null, {responseText: jsonArr});
       });
-
-      triggerOpen();
-      triggerClose();
-
+      
+      openClose(instance);
       expect(instance.modals.length).toEqual(0);
     });
 
@@ -224,8 +278,7 @@ describe('Zepto-Compatible jQuery Modal Box', function() {
         params.success(null, null, {responseText: jsonArr});
       });
 
-      triggerOpen();
-      triggerClose();
+      openClose(instance);
 
       expect(instance.modals.eq(0)).toHaveClass('is-invisible');
     });
@@ -298,8 +351,7 @@ describe('Zepto-Compatible jQuery Modal Box', function() {
       // 2. Close the modal
       // 3. Clear out the modal HTML
       // 4. Reload the modal from cache
-      triggerOpen();
-      triggerClose();
+      openClose(instance);
       
       modal = instance.modals.eq(0).html('');
       triggerOpen();
