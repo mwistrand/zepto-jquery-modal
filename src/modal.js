@@ -287,6 +287,13 @@ var overlay,
     show: function(modal, trigger) {
       this.emit('beforeShow', modal, trigger, overlay);
       current = modal;
+
+      if (this.options.closeParams &&
+          !modal.find('.js-closeModal').length) {
+        renderElement(this.options.closeParams, modal, true).
+            addClass('js-closeModal');
+      }
+
       modal.removeClass('is-invisible');
       this.showOverlay();
       this.emit('show', modal, trigger, overlay);
@@ -314,7 +321,8 @@ var overlay,
         this.emit('beforeHide', current, overlay);
 
         if (this.options.destroyOnClose) {
-          this.modals = this.modals.not(current);
+          this.modals = this.modals.not(current.get(0));
+
           current.empty().remove();
         } else {
           current.addClass('is-invisible');
@@ -405,6 +413,13 @@ var overlay,
 
       this.emit('beforeShow', modal, trigger, response);
       this[method](modal, response);
+
+      if (this.options.closeParams &&
+          !modal.find('.js-closeModal').length) {
+        renderElement(this.options.closeParams, modal, true).
+            addClass('js-closeModal');
+      }
+      
       this.emit('show', modal, trigger, response);
     },
 
