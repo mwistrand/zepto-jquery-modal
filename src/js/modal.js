@@ -294,7 +294,7 @@ var overlay,
             addClass('js-closeModal');
       }
 
-      modal.removeClass('is-invisible');
+      modal.removeClass('is-invisible').center();
       this.showOverlay();
       this.emit('show', modal, trigger, overlay);
     },
@@ -409,7 +409,7 @@ var overlay,
       this.modals || (this.modals = renderElement(this.options.modals,
           $(document.body)));
 
-      current = modal = this.modals.eq(0);
+      current = modal = this.modals.eq(0).center();
 
       this.emit('beforeShow', modal, trigger, response);
       this[method](modal, response);

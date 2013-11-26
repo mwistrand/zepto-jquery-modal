@@ -14,7 +14,7 @@ module.exports = function(grunt) {
     uglify: {
       build: {
         files: {
-          'src/modal.min.js': ['src/modal.js']
+          'modal.js': ['src/modal.js']
         }
       }
     },
