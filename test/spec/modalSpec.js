@@ -11,8 +11,8 @@
 describe('Zepto-Compatible jQuery Modal Box', function() {
   'use strict';
 
-  var triggers,
-    modals,
+  var $triggers,
+    $modals,
     instance;
 
   afterEach(function() {
@@ -24,12 +24,12 @@ describe('Zepto-Compatible jQuery Modal Box', function() {
 
   function triggerClose(i) {
     i || (i = 0);
-    modals.eq(i).find('.js-closeModal').eq(0).trigger('click');
+    $modals.eq(i).find('.js-closeModal').eq(0).trigger('click');
   }
 
   function triggerOpen(i) {
     i || (i = 0);
-    triggers.eq(i).trigger('click');
+    $triggers.eq(i).trigger('click');
   }
 
   function clickOverlay() {
@@ -38,13 +38,13 @@ describe('Zepto-Compatible jQuery Modal Box', function() {
 
   function before() {
     loadFixtures('static.html');
-    triggers = $('.js-triggerModal');
-    modals = $('.js-modal');
+    $triggers = $('.js-triggerModal');
+    $modals = $('.js-modal');
   }
 
   function after() {
-    triggers.empty().remove();
-    modals.empty().remove();
+    $triggers.empty().remove();
+    $modals.empty().remove();
   }
 
   describe('An instance', function() {
@@ -99,7 +99,7 @@ describe('Zepto-Compatible jQuery Modal Box', function() {
     it('can take a Backbone-style events object', function() {
       instance.on('show', onShow);
 
-      instance.show(modals.eq(0));
+      instance.show($modals.eq(0));
 
       expect(onShow).toHaveBeenCalled();
     });
@@ -108,7 +108,7 @@ describe('Zepto-Compatible jQuery Modal Box', function() {
       instance.options.events = null;
       instance.options.onShow = onShow;
 
-      instance.show(modals.eq(0));
+      instance.show($modals.eq(0));
       
       expect(onShow).toHaveBeenCalled()
     });
@@ -119,7 +119,7 @@ describe('Zepto-Compatible jQuery Modal Box', function() {
       before();
 
       instance = u$.modal({
-        modals: modals
+        modals: $modals
       });
     });
     afterEach(function() {
@@ -129,22 +129,22 @@ describe('Zepto-Compatible jQuery Modal Box', function() {
     it('can be closed', function() {
       triggerClose();
 
-      expect(modals.eq(0)).toHaveClass('is-invisible');
+      expect($modals.eq(0)).toHaveClass('is-invisible');
     });
 
     it('can be destroyed on close', function() {
       instance.options.destroyOnClose = true;
       triggerClose();
 
-      expect(modals.eq(0).html()).toEqual('');
+      expect($modals.eq(0).html()).toEqual('');
     });
 
     it('can be opened when an instance is created', function() {
-      expect(modals.eq(0)).not.toHaveClass('is-invisible');
+      expect($modals.eq(0)).not.toHaveClass('is-invisible');
     });
 
     it('can remain hidden if it is not the first modal', function() {
-      expect(modals.eq(1)).toHaveClass('is-invisible');
+      expect($modals.eq(1)).toHaveClass('is-invisible');
     });
 
     it('can be displayed as a lightbox', function() {
@@ -154,7 +154,7 @@ describe('Zepto-Compatible jQuery Modal Box', function() {
     it('can be displayed without an overlay', function() {
       instance.detach();
       instance = u$.modal({
-        modals: modals,
+        modals: $modals,
         isLightbox: false
       });
 
@@ -177,12 +177,12 @@ describe('Zepto-Compatible jQuery Modal Box', function() {
     });
 
     it('can add triggers to the instance', function() {
-      var trigger = triggers.eq(0);
+      var $trigger = $triggers.eq(0);
 
       instance.add($(document.body));
-      trigger.trigger('click');
+      $trigger.trigger('click');
 
-      expect(modals.eq(0)).not.toHaveClass('is-invisible');
+      expect($modals.eq(0)).not.toHaveClass('is-invisible');
     });
   });
 
@@ -200,7 +200,7 @@ describe('Zepto-Compatible jQuery Modal Box', function() {
       triggerOpen();
       clickOverlay();
 
-      expect(modals.eq(0)).toHaveClass('is-invisible');
+      expect($modals.eq(0)).toHaveClass('is-invisible');
     });
 
     it('can remain open when the overlay is clicked', function() {
@@ -208,7 +208,7 @@ describe('Zepto-Compatible jQuery Modal Box', function() {
       triggerOpen();
       clickOverlay()
 
-      expect(modals.eq(0)).not.toHaveClass('is-invisible');
+      expect($modals.eq(0)).not.toHaveClass('is-invisible');
     });
   });
 
@@ -225,23 +225,23 @@ describe('Zepto-Compatible jQuery Modal Box', function() {
     it('can display a modal when clicked', function() {
       triggerOpen();
 
-      expect(modals.eq(0)).not.toHaveClass('is-invisible');
+      expect($modals.eq(0)).not.toHaveClass('is-invisible');
     });
 
     it('can be removed from the instance', function() {
-      instance.detach(triggers.eq(0));
+      instance.detach($triggers.eq(0));
       triggerOpen();
-      expect(modals.eq(0)).toHaveClass('is-invisible');
+      expect($modals.eq(0)).toHaveClass('is-invisible');
     });
 
     it('can trigger a modal when `options.triggerClass` is a function',
         function() {
-      instance.options.triggerClass = function(trigger) {
-        return trigger.hasClass('js-triggerModal');
+      instance.options.triggerClass = function($trigger) {
+        return $trigger.hasClass('js-triggerModal');
       };
 
-      triggers.eq(0).trigger('click');
-      expect(modals.eq(0)).not.toHaveClass('is-invisible');
+      $triggers.eq(0).trigger('click');
+      expect($modals.eq(0)).not.toHaveClass('is-invisible');
     });
   });
 
@@ -252,7 +252,7 @@ describe('Zepto-Compatible jQuery Modal Box', function() {
       jsonArr = '[{"id": 12345,"text": "Test modal contents"}]';
 
     beforeEach(function() {
-      triggers = setFixtures('<a class="js-triggerModal">Trigger Modal</a>').
+      $triggers = setFixtures('<a class="js-triggerModal">Trigger Modal</a>').
           find('.js-triggerModal');
       instance = u$.modal($(document.body), {
         url: '../fixtures/json/modal.json',
@@ -261,10 +261,9 @@ describe('Zepto-Compatible jQuery Modal Box', function() {
     });
 
     function openClose(instance) {
-
       if (instance) {
         triggerOpen();
-        modals = instance.$modals;
+        $modals = instance.$modals;
         triggerClose();
       }
     }
@@ -322,15 +321,15 @@ describe('Zepto-Compatible jQuery Modal Box', function() {
     });
 
     it('can be generated from a template function', function() {
-      var div;
+      var $div;
       
       appendLoadFixtures('template.html');
 
-      instance.options.template = function(container, data) {
+      instance.options.template = function($container, data) {
         var source = $('#handlebars-template').html(),
           template = Handlebars.compile(source);
 
-        container.html(template(data));
+        $container.html(template(data));
       };
 
       spyOn($, 'ajax').andCallFake(function(params) {
@@ -339,14 +338,14 @@ describe('Zepto-Compatible jQuery Modal Box', function() {
 
       triggerOpen();
 
-      div = instance.$modals.eq(0).find('div');
-      expect(div.data('id')).toEqual(12345);
-      expect(div.text()).toEqual('Test modal contents');
+      $div = instance.$modals.eq(0).find('div');
+      expect($div.data('id')).toEqual(12345);
+      expect($div.text()).toEqual('Test modal contents');
     });
 
     it('can be rendered from the cache', function() {
       var i = 0,
-        modal;
+        $modal;
 
       spyOn($, 'ajax').andCallFake(function(params) {
         i += 1;
@@ -359,11 +358,11 @@ describe('Zepto-Compatible jQuery Modal Box', function() {
       // 4. Reload the modal from cache
       openClose(instance);
       
-      modal = instance.$modals.eq(0).html('');
+      $modal = instance.$modals.eq(0).html('');
       triggerOpen();
 
       expect(i).toBe(1);
-      expect(modal.html()).toEqual(html);
+      expect($modal.html()).toEqual(html);
     });
 
     it('can be displayed with an AJAX loader image', function() {
