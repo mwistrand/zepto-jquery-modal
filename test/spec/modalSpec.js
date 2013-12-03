@@ -57,7 +57,10 @@ describe('Zepto-Compatible jQuery Modal Box', function() {
     });
 
     it('can detach all events', function() {
+      var e = $.Event('keyup');
+
       instance = u$.modal($(document.body));
+      e.which = 27;
 
       // open and close the modal so the overlay is
       // actually available
@@ -75,6 +78,9 @@ describe('Zepto-Compatible jQuery Modal Box', function() {
 
       spyOn(instance, 'hide');
       clickOverlay();
+      expect(instance.hide).not.toHaveBeenCalled();
+
+      $(document.body).trigger(e);
       expect(instance.hide).not.toHaveBeenCalled();
     });
   });

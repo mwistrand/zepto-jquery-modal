@@ -11,6 +11,7 @@ var overlay,
   // of that modal here for all instances...
   current,
 
+  // Is the passed-in object a Zepto/jQuery object?
   isInstanceOf$ = function(obj) {
     return (window.Zepto) ? $.zepto.isZ(obj) : (obj instanceof $);
   },
@@ -41,6 +42,11 @@ var overlay,
      * from the DOM when closed?
      */
     destroyOnClose: false,
+
+    /**
+     * Should hitting the 'esc' key close the modal?
+     */
+    escapeClose: true,
 
     /**
      * The prefix for the event namespace. The namespace is generated
@@ -177,6 +183,12 @@ var overlay,
         this.hide();
       },
 
+      escapeClose: function(e) {
+        if (e.which === 27) {
+          this.hide();
+        }
+      },
+
       show: function(e) {
         var trigger = $(e.target),
           cssClass = this.options.triggerClass,
@@ -197,11 +209,11 @@ var overlay,
       }
     };
 
-    return function(name, elems, sel) {
+    return function(name, elems, sel, event) {
       var ns = (this.options.eventNamespace || '') + 'Modal:' + name + 'Event',
         callback = $.proxy(callbacks[name], this);
       
-      elems.on('click.' + ns, sel, callback);
+      elems.on((event || 'click') + '.' + ns, sel, callback);
     };
   })(),
 
@@ -217,6 +229,10 @@ var overlay,
 
       setEvent.call(this, 'close', body, '.js-closeModal');
       setEvent.call(this, 'clickOverlay', body, '.js-overlay');
+
+      if (this.options.escapeClose) {
+        setEvent.call(this, 'escapeClose', body, null, 'keyup');
+      }
     },
 
     /**
@@ -240,6 +256,7 @@ var overlay,
 
         $(document.body).off('click.' + ns + 'closeEvent');
         $(document.body).off('click.' + ns + 'clickOverlayEvent');
+        $(document.body).off('keyup.' + ns + 'escapeCloseEvent');
       }
 
       triggers && triggers.off('click.' + ns + 'showEvent');
