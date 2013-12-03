@@ -14,7 +14,7 @@ var overlay,
   isInstanceOf$ = function(obj) {
     return (window.Zepto) ? $.zepto.isZ(obj) : (obj instanceof $);
   },
-
+  
   defaults = {
 
     /**
@@ -104,6 +104,7 @@ var overlay,
     this.attachModalEvents();
 
     if (triggers || this.options.modals || this.options.url) {
+
       if (triggers === null) {
         this.load(null, 0);
       } else {
@@ -165,7 +166,6 @@ var overlay,
 
     var callbacks = {
       clickOverlay: function() {
-
         if (overlay.data('clickToClose')) {
           this.hide();
         }
@@ -257,7 +257,6 @@ var overlay,
      *        no click event will be added, just `this.options.triggerClass`.
      */
     add: function(triggers, isDelegate) {
-
       if (this.triggers && isDelegate === false) {
         triggers.addClass(this.options.triggerClass);
       } else {
@@ -284,23 +283,24 @@ var overlay,
       this.show(modal, trigger);
     },
 
-    show: function(modal, trigger) {
-      this.emit('beforeShow', modal, trigger, overlay);
+    beforeShow: function(modal, trigger) {
       current = modal;
+      this.emit('beforeShow', modal, trigger, overlay);
+    },
 
-      if (this.options.closeParams &&
-          !modal.find('.js-closeModal').length) {
-        renderElement(this.options.closeParams, modal, true).
-            addClass('js-closeModal');
-      }
-
+    render: function(modal, trigger) {
+      this.setCloseLink(modal);
       modal.removeClass('is-invisible').center();
       this.showOverlay();
       this.emit('show', modal, trigger, overlay);
     },
 
-    showOverlay: function() {
+    show: function(modal, trigger) {
+      this.beforeShow(modal, trigger);
+      this.render(modal, trigger);
+    },
 
+    showOverlay: function() {
       if (this.options.isLightbox) {
 
         if (!overlay) {
@@ -316,7 +316,6 @@ var overlay,
     },
 
     hide: function() {
-
       if (current) {
         this.emit('beforeHide', current, overlay);
 
@@ -335,6 +334,14 @@ var overlay,
       current = null;
     },
 
+    setCloseLink: function(modal) {
+      if (this.options.closeParams &&
+          !modal.find('.js-closeModal').length) {
+        renderElement(this.options.closeParams, modal, true).
+            addClass('js-closeModal');
+      }
+    },
+
     emit: function(name) {
       var events = this.options.events,
         start = events ? 0 : 1,
@@ -349,6 +356,8 @@ var overlay,
 
   ajaxModalProto = $.extend({}, modalProto, {
     options: $.extend({}, defaults, {
+      // loaderClass: 'modal__loader',
+      // loaderHTML: '<div />'
       // responseType: 'json', /* default; or 'HTML'*/
       // query: '' || function(trigger) {},
       // template: '<div>{{field}}</div>' || function(container, data) {}
@@ -360,7 +369,6 @@ var overlay,
     }),
 
     setCache: function(key, data) {
-
       if (this.options.cache) {
         this._cache || (this._cache = {});
         this._cache[key] = data;
@@ -388,9 +396,11 @@ var overlay,
           url: this.options.url,
           data: query,
           beforeSend: function(xhr, settings) {
+            this.showLoader();
             this.emit('beforeSend', trigger, xhr, settings);
           }.bind(this),
           success: function(data, status, xhr) {
+            this.hideLoader();
             this.setCache(query, xhr.responseText);
             this.show(xhr.responseText, trigger);
           }.bind(this),
@@ -401,26 +411,36 @@ var overlay,
       }
     },
 
+    showLoader: function() {
+      if (this.options.loaderClass) {
+        this.showOverlay();
+        this.loader = $((this.options.loaderHTML || '<div />')).
+            addClass(this.options.loaderClass);
+      }
+    },
+
+    hideLoader: function() {
+      if (this.loader) {
+        this.loader.remove();
+        this.loader = null;
+      }
+    },
+
     show: function(response, trigger) {
       var method = 'render' + ((this.options.responseType === 'html') ?
           'HTML' : 'JSON'),
-        modal;
+        modal = this.setModal();
 
+      this.beforeShow(modal, trigger);
+      this[method](modal, response);
+      this.render(modal, trigger);
+    },
+
+    setModal: function() {
       this.modals || (this.modals = renderElement(this.options.modals,
           $(document.body)));
 
-      current = modal = this.modals.eq(0).center();
-
-      this.emit('beforeShow', modal, trigger, response);
-      this[method](modal, response);
-
-      if (this.options.closeParams &&
-          !modal.find('.js-closeModal').length) {
-        renderElement(this.options.closeParams, modal, true).
-            addClass('js-closeModal');
-      }
-      
-      this.emit('show', modal, trigger, response);
+      return this.modals.eq(0);
     },
 
     renderJSON: function(modal, json) {

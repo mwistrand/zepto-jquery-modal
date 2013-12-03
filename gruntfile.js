@@ -14,14 +14,14 @@ module.exports = function(grunt) {
     uglify: {
       build: {
         files: {
-          'modal.js': ['src/modal.js']
+          'modal.js': ['lib/jquery.center.js', 'src/js/modal.js']
         }
       }
     },
 
     watch: {
       js: {
-        files: 'src/modal.js',
+        files: ['lib/jquery.center.js', 'src/js/modal.js'],
         tasks: ['uglify']
       },
 

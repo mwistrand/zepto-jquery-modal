@@ -29,3 +29,16 @@
 
   background: #fff;
 }
+.loader--modal {
+  height: 64px;
+  left: 50%;
+  margin-left: -32px;
+  margin-top: -32px;
+  position: fixed;
+  top: 50%;
+  width: 64px;
+  z-index: 9999;
+
+  background: #191919 url(../img/loader.gif) center center no-repeat;
+  border-radius: 10px;
+}

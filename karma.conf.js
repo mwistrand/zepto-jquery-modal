@@ -14,6 +14,7 @@ module.exports = function(config) {
 
       // dependencies
       "lib/jquery.min.js",
+      "lib/jquery.center.js",
       "lib/underscore.js",
       "lib/backbone.js",
       "lib/handlebars.js",
@@ -26,7 +27,7 @@ module.exports = function(config) {
       "test/helpers/fixtures.js",
 
       // code you want to test
-      "src/modal.js",
+      "src/js/modal.js",
 
       // test code
       "test/spec/*.js"
