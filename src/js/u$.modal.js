@@ -269,8 +269,7 @@ var $overlay,
       if (this.options.isLightbox) {
 
         if (!$overlay) {
-          $overlay = u$.render(this.options.overlayParams,
-              this.$body);
+          $overlay = u$.render(this.$body, this.options.overlayParams);
 
           $overlay.addClass('js-overlay');
         }
@@ -286,8 +285,8 @@ var $overlay,
 
         if (this.options.destroyOnClose) {
           this.$modals = this.$modals.not($current.get(0));
-
           $current.empty().remove();
+          $current = null;
         } else {
           $current.addClass('is-invisible');
         }
@@ -302,7 +301,7 @@ var $overlay,
     setCloseLink: function($modal) {
       if (this.options.closeParams &&
           !$modal.find('.js-closeModal').length) {
-        u$.render(this.options.closeParams, $modal, true).
+        u$.render($modal, this.options.closeParams, true).
             addClass('js-closeModal');
       }
     },
@@ -387,8 +386,8 @@ var $overlay,
     },
 
     setModal: function() {
-      this.$modals || (this.$modals = u$.render(this.options.modals,
-          this.$body));
+      this.$modals || (this.$modals = u$.render(this.$body,
+          this.options.modals));
 
       return this.$modals.eq(0);
     }
