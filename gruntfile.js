@@ -19,10 +19,18 @@ module.exports = function(grunt) {
       }
     },
 
+    jshint: {
+      options: {
+        expr: true
+      },
+
+      all: ['gruntfile.js', 'src/js/*.js', 'test/spec/*.js']
+    },
+
     watch: {
       js: {
         files: ['lib/jquery.center.js', 'src/js/modal.js'],
-        tasks: ['uglify']
+        tasks: ['jshint', 'uglify']
       },
 
       karma: {

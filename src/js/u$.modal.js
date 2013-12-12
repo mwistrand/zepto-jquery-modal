@@ -7,18 +7,17 @@ ns || (ns = window);
 
 var $overlay,
 
-  $body,
-
   // Only one modal will be open at a time, and we'll keep track
   // of that modal here for all instances...
   $current,
-
-  // Is the passed-in object a Zepto/jQuery object?
-  isInstanceOf$ = function(obj) {
-    return (window.Zepto) ? $.zepto.isZ(obj) : (obj instanceof $);
-  },
   
   defaults = {
+    // EVENTS
+    // detach: function($modals, $triggers) {},
+    // beforeShow: function($modal, $trigger, $overlay) {},
+    // show: function($modal, $trigger, $overlay) {},
+    // beforeHide: function($modal, $overlay) {},
+    // hide: function($modal, $overlay) {},
 
     /**
      * If this is `true`, the modal can be closed by clicking the overlay.
@@ -60,7 +59,7 @@ var $overlay,
     /**
      * A Backbone style events object that will be integrated
      * with the `modal` object (on instantiation, via `$.extend`).
-     * Any such object must implement a `trigger` function in order
+     * Any such object must implement a `trigger` method in order
      * to function properly.
      */
     events: null,
@@ -99,15 +98,15 @@ var $overlay,
     overlayParams: '<div class="overlay"></div>',
 
     /**
-     * The CSS class applied to all modals.
+     * The CSS class applied to all triggers.
      */
     triggerClass: 'js-triggerModal'
   },
-
+  instanceI = 0,
   initialize = function($triggers, options) {
     this.options = $.extend({}, this.options, (options || null));
-    $body && $body.length || ($body = $(document.body));
-
+    this.$body = $(document.body);
+    this._i = ++instanceI;
     // The only event that will always be attached is the
     // "close modal" event.
     this.attachModalEvents();
@@ -123,56 +122,7 @@ var $overlay,
     }
   },
 
-  // Creates a `$` object from an array/string of data
-  // and injects it into the optional parent.
-  renderElement = function(info, parent, prepend) {
-    var $elem = $.isArray(info) ? $.apply($, info) : $(info),
-      method = prepend ? 'prependTo' : 'appendTo';
-
-    if (parent) {
-      $elem[method](parent);
-    }
-
-    return $elem;
-  },
-
-  // Used by `ajaxModalProto`. Provides basic template rendering capabilities.
-  // 
-  // Usage:
-  //   `var template = '<div data-id="{{id}}">{{title}}</div>',
-  //     data = [{'id': 12345, 'title': 'Lorem ipsum dolor sit amet'}];
-  //   render(template, data, $('#container'));
-  //
-  render = (function() {
-    var pattern = /\{\{([A-Za-z0-9\-_]+)\}\}/gi;
-
-    function setHTML(template, item, $container) {
-      var html = template.replace(pattern, function(matched, key) {
-        var replacement = item[key];
-
-        return replacement || '';
-      });
-
-      if (html.length) {
-        $(html).appendTo($container);
-      }
-    }
-
-    return function(template, data, $container) {
-      $container.html('');
-
-      if ($.isArray(data)) {
-        data.forEach(function(item) {
-          setHTML(template, item, $container);
-        });
-      } else {
-        setHTML(template, data, $container);
-      }
-    };
-  })(),
-
   setEvent = (function() {
-
     var callbacks = {
       clickOverlay: function() {
         if ($overlay.data('clickToClose')) {
@@ -213,7 +163,7 @@ var $overlay,
     };
 
     return function(name, $elems, sel, event) {
-      var ns = (this.options.eventNamespace || '') + 'Modal:' + name + 'Event',
+      var ns = (this.options.eventNamespace || '') + 'Modal.' + name + 'Event',
         callback = $.proxy(callbacks[name], this);
       
       $elems.on((event || 'click') + '.' + ns, sel, callback);
@@ -228,11 +178,11 @@ var $overlay,
     },
 
     attachModalEvents: function() {
-      setEvent.call(this, 'close', $body, '.js-closeModal');
-      setEvent.call(this, 'clickOverlay', $body, '.js-overlay');
+      setEvent.call(this, 'close', this.$body, '.js-closeModal');
+      setEvent.call(this, 'clickOverlay', this.$body, '.js-overlay');
 
       if (this.options.escapeClose) {
-        setEvent.call(this, 'escapeClose', $body, null, 'keyup');
+        setEvent.call(this, 'escapeClose', this.$body, null, 'keyup');
       }
     },
 
@@ -243,26 +193,21 @@ var $overlay,
      * @param triggers The `$` element(s) from which to remove events.
      */
     detach: function($triggers) {
-      var ns = (this.options.eventNamespace || '') + 'Modal:',
-        $modals;
+      var ns = (this.options.eventNamespace || '') + 'Modal',
+        args;
 
-      if ($triggers) {
+      if ($triggers && $triggers.length) {
         $triggers.removeClass(this.options.triggerClass);
+        this.$triggers = this.$triggers.not($triggers);
       } else {
         this.hide();
-        $triggers = this.$triggers;
-        $modals = this.$modals;
-        this.$triggers = null;
-        this.$modals = null;
-
-        $body.off('click.' + ns + 'closeEvent');
-        $body.off('click.' + ns + 'clickOverlayEvent');
-        $body.off('keyup.' + ns + 'escapeCloseEvent');
+        args = u$.detach(this, ns, '$modals', '$triggers', '$body');
+        args.pop(); // $body won't be passed to `this.emit`
       }
 
-      $triggers && $triggers.off('click.' + ns + 'showEvent');
-
-      this.emit('detach', $modals, $triggers);
+      args || (args = [$triggers]);
+      args.unshift('detach');
+      this.emit.apply(this, args);
     },
 
     /**
@@ -270,7 +215,7 @@ var $overlay,
      * `isDelegate` is deliberately set to `false`, then it is assumed
      * that the passed-in triggers are child elements of existing triggers.
      *
-     * @param triggers The new elements that will trigger modals.
+     * @param $triggers The new elements that will trigger modals.
      * @param isDelegate Ignored by default. If set to Boolean `false`, then
      *        no click event will be added, just `this.options.triggerClass`.
      */
@@ -307,6 +252,7 @@ var $overlay,
       this.emit('beforeShow', $modal, $trigger, $overlay);
     },
 
+    // this may not be the best name for the method
     render: function($modal, $trigger) {
       this.setCloseLink($modal);
       $modal.removeClass('is-invisible').center();
@@ -323,8 +269,8 @@ var $overlay,
       if (this.options.isLightbox) {
 
         if (!$overlay) {
-          $overlay = renderElement(this.options.overlayParams,
-              $body);
+          $overlay = u$.render(this.options.overlayParams,
+              this.$body);
 
           $overlay.addClass('js-overlay');
         }
@@ -356,7 +302,7 @@ var $overlay,
     setCloseLink: function($modal) {
       if (this.options.closeParams &&
           !$modal.find('.js-closeModal').length) {
-        renderElement(this.options.closeParams, $modal, true).
+        u$.render(this.options.closeParams, $modal, true).
             addClass('js-closeModal');
       }
     },
@@ -373,11 +319,18 @@ var $overlay,
     }
   },
 
-  ajaxModalProto = $.extend({}, modalProto, {
+  //ajaxModalProto = $.extend({}, u$.cacheMixin, u$.loaderMixin, modalProto, {
+  ajaxModalProto = $.extend(Object.create(modalProto), u$.cacheMixin,
+      u$.loaderMixin, {
+
     options: $.extend({}, defaults, {
-      // loaderClass: 'modal__loader',
+      // EVENTS
+      // beforeSend: function($trigger, xhr, settings) {},
+      // ajaxError: function($trigger, xhr, errorType, error) {},
+
+      // loaderClass: 'loader--modal',
       // loaderHTML: '<div />'
-      // responseType: 'json', /* default; or 'HTML'*/
+      // responseType: 'html', /* default; or 'json'*/
       // query: '' || function(trigger) {},
       // template: '<div>{{field}}</div>' || function(container, data) {}
 
@@ -386,17 +339,6 @@ var $overlay,
         'class': 'modal js-modal'
       }]
     }),
-
-    setCache: function(key, data) {
-      if (this.options.cache) {
-        this._cache || (this._cache = {});
-        this._cache[key] = data;
-      }
-    },
-
-    getCache: function(key) {
-      return this._cache && this._cache[key] || null;
-    },
 
     load: function($trigger) {
       var query = this.options.query,
@@ -415,7 +357,7 @@ var $overlay,
           url: this.options.url,
           data: query,
           beforeSend: function(xhr, settings) {
-            this.showLoader();
+            this.showLoader(this.showOverlay);
             this.emit('beforeSend', $trigger, xhr, settings);
           }.bind(this),
           success: function(data, status, xhr) {
@@ -430,51 +372,25 @@ var $overlay,
       }
     },
 
-    showLoader: function() {
-      if (this.options.loaderClass) {
-        this.showOverlay();
-        this.$loader = $((this.options.loaderHTML || '<div />')).
-            addClass(this.options.loaderClass);
-      }
-    },
-
-    hideLoader: function() {
-      if (this.$loader) {
-        this.$loader.remove();
-        this.$loader = null;
-      }
-    },
-
     show: function(response, $trigger) {
-      var method = 'render' + ((this.options.responseType === 'html') ?
-          'HTML' : 'JSON'),
-        $modal = this.setModal();
+      var $modal = this.setModal();
 
       this.beforeShow($modal, $trigger);
-      this[method]($modal, response);
+
+      if (this.options.responseType === 'json') {
+        u$.renderJSON($modal, response, this.options.template);
+      } else {
+        $modal.html(response);
+      }
+
       this.render($modal, $trigger);
     },
 
     setModal: function() {
-      this.$modals || (this.$modals = renderElement(this.options.modals,
-          $body));
+      this.$modals || (this.$modals = u$.render(this.options.modals,
+          this.$body));
 
       return this.$modals.eq(0);
-    },
-
-    renderJSON: function($modal, json) {
-      var obj = $.parseJSON(json),
-        template = this.options.template;
-
-      if ($.isFunction(template)) {
-        template($modal, obj);
-      } else {
-        render(template, obj, $modal);
-      }
-    },
-    
-    renderHTML: function($modal, response) {
-      $modal.html(response);
     }
   });
 
@@ -482,7 +398,7 @@ ns.modal = function($triggers, options) {
   var proto = modalProto,
     instance;
 
-  if (!isInstanceOf$($triggers)) {
+  if (!u$.is$($triggers)) {
     options = $triggers;
     $triggers = null;
   }

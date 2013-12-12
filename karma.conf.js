@@ -18,6 +18,7 @@ module.exports = function(config) {
       "lib/underscore.js",
       "lib/backbone.js",
       "lib/handlebars.js",
+      "../utilities/u$.js",
 
       // test helper code
       "test/helpers/jasmine-jquery.js",
@@ -27,7 +28,7 @@ module.exports = function(config) {
       "test/helpers/fixtures.js",
 
       // code you want to test
-      "src/js/modal.js",
+      "src/js/u$.modal.js",
 
       // test code
       "test/spec/*.js"
