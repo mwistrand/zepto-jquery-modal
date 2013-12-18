@@ -318,7 +318,6 @@ var $overlay,
     }
   },
 
-  //ajaxModalProto = $.extend({}, u$.cacheMixin, u$.loaderMixin, modalProto, {
   ajaxModalProto = $.extend(Object.create(modalProto), u$.cacheMixin,
       u$.loaderMixin, {
 
@@ -330,8 +329,8 @@ var $overlay,
       // loaderClass: 'loader--modal',
       // loaderHTML: '<div />'
       // responseType: 'html', /* default; or 'json'*/
-      // query: '' || function(trigger) {},
-      // template: '<div>{{field}}</div>' || function(container, data) {}
+      // query: '' || function($trigger) {},
+      // template: '<div>{{field}}</div>' || function($container, data) {}
 
       cache: true,
       modals: ['<div />', {
