@@ -255,9 +255,17 @@ var $overlay,
     // this may not be the best name for the method
     render: function($modal, $trigger) {
       this.setCloseLink($modal);
-      $modal.removeClass('is-invisible').center();
+      this.center($modal).removeClass('is-invisible');
       this.showOverlay();
       this.emit('show', $modal, $trigger, $overlay);
+    },
+
+    center: function($modal) {
+      return $modal.css({
+        marginTop: -$modal.outerHeight()/2 + 'px',
+        marginLeft: -$modal.outerWidth()/2 + 'px',
+        position: 'absolute'
+      });
     },
 
     show: function($modal, $trigger) {

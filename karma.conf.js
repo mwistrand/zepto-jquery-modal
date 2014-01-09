@@ -13,11 +13,11 @@ module.exports = function(config) {
       { pattern: "test/fixtures/json/*.json", watched: true, served: true, included: false },
 
       // dependencies
-      "lib/jquery.min.js",
-      "lib/jquery.center.js",
-      "lib/underscore.js",
-      "lib/backbone.js",
-      "lib/handlebars.js",
+      "vendor/jquery.min.js",
+      "vendor/jquery.center.js",
+      "vendor/underscore.js",
+      "vendor/backbone.js",
+      "vendor/handlebars.js",
       "../utilities/u$.js",
 
       // test helper code

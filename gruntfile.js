@@ -4,17 +4,10 @@ module.exports = function(grunt) {
   grunt.initConfig({
     pkg: grunt.file.readJSON('package.json'),
 
-    karma: {
-      unit: {
-        configFile: 'karma.conf.js',
-        background: true
-      }
-    },
-
     uglify: {
       build: {
         files: {
-          'modal.js': ['lib/jquery.center.js', 'src/js/modal.js']
+          'u$.modal.js': ['lib/jquery.center.js', 'src/js/modal.js']
         }
       }
     },
@@ -31,14 +24,9 @@ module.exports = function(grunt) {
       js: {
         files: ['lib/jquery.center.js', 'src/js/modal.js'],
         tasks: ['jshint', 'uglify']
-      },
-
-      karma: {
-        files: ['src/*.js', 'test/**/*.js'],
-        tasks: ['karma:unit:run']
       }
     }
   });
 
-  grunt.registerTask('default', []);
+  grunt.registerTask('default', ['jshint', 'uglify']);
 };
