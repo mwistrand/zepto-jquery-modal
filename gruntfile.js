@@ -7,7 +7,7 @@ module.exports = function(grunt) {
     uglify: {
       build: {
         files: {
-          'u$.modal.js': ['lib/jquery.center.js', 'src/js/modal.js']
+          'u$.modal.js': 'src/js/u$.modal.js'
         }
       }
     },
@@ -22,7 +22,7 @@ module.exports = function(grunt) {
 
     watch: {
       js: {
-        files: ['lib/jquery.center.js', 'src/js/modal.js'],
+        files: 'src/js/modal.js',
         tasks: ['jshint', 'uglify']
       }
     }
