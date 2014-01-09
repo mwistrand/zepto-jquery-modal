@@ -108,7 +108,7 @@ describe('Zepto-Compatible jQuery Modal Box', function() {
 
       instance.show($modals.first());
       
-      expect(onShow).toHaveBeenCalled()
+      expect(onShow).toHaveBeenCalled();
     });
   });
 
@@ -204,7 +204,7 @@ describe('Zepto-Compatible jQuery Modal Box', function() {
     it('can remain open when the overlay is clicked', function() {
       instance.options.clickOverlayToClose = false;
       triggerOpen();
-      clickOverlay()
+      clickOverlay();
 
       expect($modals.first()).not.toHaveClass('is-invisible');
     });
