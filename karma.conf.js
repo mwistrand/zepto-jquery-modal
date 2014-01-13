@@ -14,7 +14,6 @@ module.exports = function(config) {
 
       // dependencies
       "vendor/jquery.min.js",
-      "vendor/jquery.center.js",
       "vendor/underscore.js",
       "vendor/backbone.js",
       "vendor/handlebars.js",
