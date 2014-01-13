@@ -317,8 +317,7 @@ var $overlay,
     emit: function(name) {
       var events = this.options.events,
         start = events ? 0 : 1,
-        method = events ? this.trigger : this.options['on' +
-            name.charAt(0).toUpperCase() + name.slice(1)];
+        method = events ? this.trigger : this.options[name];
 
       if ($.isFunction(method)) {
         method.apply(this, [].slice.call(arguments, start));

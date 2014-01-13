@@ -104,7 +104,7 @@ describe('Zepto-Compatible jQuery Modal Box', function() {
 
     it('can emit a callback set in the options', function() {
       instance.options.events = null;
-      instance.options.onShow = onShow;
+      instance.options.show = onShow;
 
       instance.show($modals.first());
       
