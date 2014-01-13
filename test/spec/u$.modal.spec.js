@@ -18,8 +18,13 @@ describe('Zepto-Compatible jQuery Modal Box', function() {
   afterEach(function() {
     // `instance` is created in the `beforeEach` block of each
     // nested `describe` block.
-    instance.detach();
+    detach();
   });
+
+  function detach() {
+    instance.hide();
+    instance.detach();
+  }
 
   function triggerClose(i) {
     i || (i = 0);
@@ -150,7 +155,7 @@ describe('Zepto-Compatible jQuery Modal Box', function() {
     });
 
     it('can be displayed without an overlay', function() {
-      instance.detach();
+      detach();
       instance = u$.modal({
         modals: $modals,
         isLightbox: false

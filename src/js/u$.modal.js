@@ -200,7 +200,6 @@ var $overlay,
         $triggers.removeClass(this.options.triggerClass);
         this.$triggers = this.$triggers.not($triggers);
       } else {
-        this.hide();
         args = u$.detach(this, ns, '$modals', '$triggers', '$body');
         args.pop(); // $body won't be passed to `this.emit`
       }
