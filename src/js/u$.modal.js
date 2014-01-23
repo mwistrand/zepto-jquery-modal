@@ -261,9 +261,11 @@ var $overlay,
 
     center: function($modal) {
       return $modal.css({
+        left: '50%',
         marginTop: -$modal.outerHeight()/2 + 'px',
         marginLeft: -$modal.outerWidth()/2 + 'px',
-        position: 'absolute'
+        position: 'absolute',
+        top: '50%'
       });
     },
 
