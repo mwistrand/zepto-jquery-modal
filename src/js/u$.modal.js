@@ -268,13 +268,16 @@ var $overlay,
     },
 
     center: function($modal) {
-      return $modal.css({
-        left: '50%',
-        marginTop: -$modal.outerHeight()/2 + 'px',
-        marginLeft: -$modal.outerWidth()/2 + 'px',
-        position: 'absolute',
-        top: '50%'
-      });
+      $modal.addClass('centered');
+
+      if (window.jQuery) {
+        $modal.css({
+          marginTop: -$modal.outerHeight()/2 + 'px',
+          marginLeft: -$modal.outerWidth()/2 + 'px',
+        });
+      }
+
+      return $modal;
     },
 
     show: function($modal, $trigger) {

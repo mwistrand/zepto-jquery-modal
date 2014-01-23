@@ -3,6 +3,9 @@
 First, this is not a plugin. I do a lot of development that requires combining objects together, so I need access to the underlying object.
 `$elem.modal().data('modal').methodName` seems inelegant to me, so I chose not to implement this as a plugin.
 
+## Assumptions
+Any browser that can run Zepto also supports CSS3 transforms, which are used to center modals on the page. As a result, CSS can be used to center the modal in just about any browser save IE8. However, rather than include extra code to check that transforms are supported and provide a Zepto fallback for `$.fn.outerWidth` and `$.fn.outerHeight`, I assume that jQuery requires manual centering and Zepto can delegate to CSS.
+
 ## Dependencies
 As much as possible, I separate functionality common across objects into separate functions. These functions are methods of the `u$` object, and can be found in the [u$ library](https://github.com/mwistrand/zepto-jquery-utilities). Specifically used are the `detach`, `render`, `renderJSON`, and `is$` methods, as well as the `loaderMixin` and `cacheMixin` mixins. 
 

@@ -12,11 +12,17 @@
   background: #000;
   opacity: 0.6;
 }
-.modal {
+.centered {
+  left: 50%;
   position: absolute;
+  top: 50%;
   z-index: 9999;
 
-  background: #fff;
+  -webkit-transform: translate(-50%, -50%);
+  /*-moz-transform: translate(-50%, -50%);*/
+  -ms-transform: translate(-50%, -50%);
+  -o-transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%);
 }
 .loader--modal {
   height: 64px;
