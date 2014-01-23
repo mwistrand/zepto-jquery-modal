@@ -231,12 +231,20 @@ var $overlay,
 
     load: function($trigger, i) {
       var index = $trigger ? $trigger.data('modalindex') : i,
-        $modal;
+        $modal,
+        modalId;
 
       if (typeof index !== 'number') {
-        index = this.$modals && this.$modals.length || 0;
-        $modal = $('#' + $trigger.data('modalid'));
-        this.$modals = index ? this.$modals.add($modal) : $modal;
+        modalId = '#' + $trigger.data('modalid');
+        $modal = this.$modals && this.$modals.filter(modalId);
+        index = $modal && $modal.length ? $modal.index(this.$modals) : -1;
+        
+        if (index === -1) {
+          index = this.$modals && this.$modals.length || 0;
+          $modal = $(modalId);
+          this.$modals = index ? this.$modals.add($modal) : $modal;
+        }
+
         $trigger.data('modalindex', index);
       } else {
         this.$modals || (this.$modals = $(this.options.modals));

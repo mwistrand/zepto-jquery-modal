@@ -246,6 +246,13 @@ describe('Zepto-Compatible jQuery Modal Box', function() {
       $triggers.eq(0).trigger('click');
       expect($modals.first()).not.toHaveClass('is-invisible');
     });
+
+    it('can display a modal that has already been loaded', function() {
+      triggerOpen();
+      triggerClose();
+      triggerOpen(3);
+      expect($triggers.eq(3).data('modalindex')).toEqual(0);
+    });
   });
 
   describe('An Ajax Modal', function() {
