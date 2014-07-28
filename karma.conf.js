@@ -13,11 +13,12 @@ module.exports = function(config) {
       { pattern: "test/fixtures/json/*.json", watched: true, served: true, included: false },
 
       // dependencies
-      "vendor/jquery.min.js",
-      "vendor/underscore.js",
-      "vendor/backbone.js",
-      "vendor/handlebars.js",
-      "../utilities/u$.js",
+      "bower_components/jquery/dist/jquery.min.js",
+      "bower_components/underscore/underscore.js",
+      "bower_components/backbone/backbone.js",
+      "bower_components/handlebars/handlebars.min.js",
+      "bower_components/cssdetect/jquery.cssDetect.js",
+      "bower_components/utilities/u$.js",
 
       // test helper code
       "test/helpers/jasmine-jquery.js",
