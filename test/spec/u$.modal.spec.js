@@ -27,13 +27,11 @@ describe('Zepto-Compatible jQuery Modal Box', function() {
   }
 
   function triggerClose(i) {
-    i || (i = 0);
-    $modals.eq(i).find('.js-closeModal').eq(0).trigger('click');
+    $modals.eq(i || 0).find('.js-closeModal').eq(0).trigger('click');
   }
 
   function triggerOpen(i) {
-    i || (i = 0);
-    $triggers.eq(i).trigger('click');
+    $triggers.eq(i || 0).trigger('click');
   }
 
   function clickOverlay() {
@@ -88,170 +86,199 @@ describe('Zepto-Compatible jQuery Modal Box', function() {
     });
   });
 
-  describe('Event Emitter', function() {
-    var onShow;
-
+  describe('A modal instance', function() {
     beforeEach(function() {
-      onShow = jasmine.createSpy('onShow');
- 
-      instance = u$.modal({
-        events: Backbone.Events
+      before();
+    });
+    afterEach(function() {
+      after();
+    });
+
+    describe('without triggers', function() {
+      beforeEach(function() {
+        instance = u$.modal({
+          modals: $modals
+        });
+      });
+
+      it('displays the modal immediately', function() {
+        expect($modals.first()).not.toHaveClass('is-invisible');
+      });
+
+      it('displays only the first modal in the collection', function() {
+        expect($modals.eq(1)).toHaveClass('is-invisible');
       });
     });
 
-    it('can take a Backbone-style events object', function() {
-      instance.on('show', onShow);
+    describe('with triggers', function() {
+      beforeEach(function() {
+        instance = u$.modal($(document.body));
+      });
 
-      instance.show($modals.first());
+      it('does not display the modal immediately', function() {
+        expect($modals.first()).toHaveClass('is-invisible');
+      });
 
-      expect(onShow).toHaveBeenCalled();
+      it('displayed the modal when a trigger is clicked', function() {
+        triggerOpen();
+
+        expect($modals.first()).not.toHaveClass('is-invisible');
+      });
+
+      it('can remove triggers from the instance', function() {
+        instance.detach($triggers.first());
+        triggerOpen();
+        expect($modals.first()).toHaveClass('is-invisible');
+      });
+
+      it('can load trigger elements from a a function', function() {
+        instance.options.triggerClass = function($trigger) {
+          return $trigger.hasClass('js-triggerModal');
+        };
+
+        $triggers.first().trigger('click');
+        expect($modals.first()).not.toHaveClass('is-invisible');
+      });
     });
 
-    it('can emit a callback set in the options', function() {
-      instance.options.events = null;
-      instance.options.show = onShow;
+    describe('without modal elements', function() {
+      beforeEach(function() {
+        instance = u$.modal();
+      });
 
-      instance.show($modals.first());
-      
-      expect(onShow).toHaveBeenCalled();
+      it('does not trigger anything on load', function() {
+        expect($modals.first()).toHaveClass('is-invisible');
+      });
+
+      it('can add triggers to the instance', function() {
+        instance.add($(document.body));
+        triggerOpen();
+
+        expect($modals.first()).not.toHaveClass('is-invisible');
+      });
+    });
+
+    describe('without an overlay', function() {
+      beforeEach(function() {
+        instance = u$.modal({
+          modals: $modals,
+          isLightbox: false
+        });
+      });
+
+      it('does not create an overlay element', function() {
+        expect($('.js-overlay')).toHaveClass('is-invisible');
+      });
+    });
+
+    describe('as a lightbox', function() {
+      beforeEach(function() {
+        instance = u$.modal({
+          modals: $modals
+        });
+      });
+
+      it('displays an overlay', function() {
+        expect($('.js-overlay').length).toEqual(1);
+      });
     });
   });
 
   describe('A modal', function() {
     beforeEach(function() {
       before();
-
-      instance = u$.modal({
-        modals: $modals
-      });
     });
     afterEach(function() {
       after();
     });
 
-    it('can be closed', function() {
-      triggerClose();
+    describe('without CSS transition support', function() {
+      beforeEach(function() {
+        spyOn($, 'cssDetect').andCallFake(function() {
+          return false;
+        });
 
-      expect($modals.first()).toHaveClass('is-invisible');
-    });
-
-    it('can be destroyed on close', function() {
-      instance.options.destroyOnClose = true;
-      triggerClose();
-
-      expect($modals.first().html()).toEqual('');
-    });
-
-    it('can be opened when an instance is created', function() {
-      expect($modals.first()).not.toHaveClass('is-invisible');
-    });
-
-    it('can remain hidden if it is not the first modal', function() {
-      expect($modals.eq(1)).toHaveClass('is-invisible');
-    });
-
-    it('can be displayed as a lightbox', function() {
-      expect($('.js-overlay').length).toEqual(1);
-    });
-
-    it('can be displayed without an overlay', function() {
-      detach();
-      instance = u$.modal({
-        modals: $modals,
-        isLightbox: false
+        instance = u$.modal({
+          modals: $modals
+        });
       });
 
-      expect($('.js-overlay')).toHaveClass('is-invisible');
-    });
-  });
+      it('manually positions the modal', function() {
+        var marginLeft = parseInt($modals.first().css('margin-left'), 10);
 
-  describe('A blank instance', function() {
-    beforeEach(function() {
-      before();
-
-      instance = u$.modal();
-    });
-    afterEach(function() {
-      after();
+        expect(Math.abs(marginLeft)).toBeGreaterThan(0);
+      });
     });
 
-    it('does not trigger anything on load', function() {
-      expect($('.js-modal')).toHaveClass('is-invisible');
+    describe('with CSS transition support', function() {
+      beforeEach(function() {
+        spyOn($, 'cssDetect').andCallFake(function() {
+          return true;
+        });
+
+        instance = u$.modal({
+          modals: $modals
+        });
+      });
+
+      it('allows the position to be set by a CSS class', function() {
+        var marginLeft = parseInt($modals.first().css('margin-left'), 10);
+
+        expect(marginLeft).toEqual(0);
+      });
     });
 
-    it('can add triggers to the instance', function() {
-      var $trigger = $triggers.eq(0);
+    describe('when opened', function() {
+      beforeEach(function() {
+        instance = u$.modal($(document.body));
+      });
 
-      instance.add($(document.body));
-      $trigger.trigger('click');
+      it('can be closed and removed from the DOM', function() {
+        instance.options.destroyOnClose = true;
+        triggerOpen();
+        triggerClose();
 
-      expect($modals.first()).not.toHaveClass('is-invisible');
+        expect($modals.first().html()).toEqual('');
+      });
+
+      it('can be closed and preserved in the DOM', function() {
+        triggerClose();
+
+        expect($modals.first()).toHaveClass('is-invisible');
+        
+        triggerOpen();
+        expect($modals.first()).not.toHaveClass('is-invisible');        
+      });
     });
   });
 
   describe('An overlay', function() {
     beforeEach(function() {
       before();
-
-      instance = u$.modal($(document.body));
     });
     afterEach(function() {
       after();
     });
 
-    it('can be clicked to close a modal', function() {
-      triggerOpen();
-      clickOverlay();
+    describe('when clicked', function() {
+      beforeEach(function() {
+        instance = u$.modal($(document.body));
+      });
 
-      expect($modals.first()).toHaveClass('is-invisible');
-    });
+      it('can close a modal', function() {
+        triggerOpen();
+        clickOverlay();
 
-    it('can remain open when the overlay is clicked', function() {
-      instance.options.clickOverlayToClose = false;
-      triggerOpen();
-      clickOverlay();
+        expect($modals.first()).toHaveClass('is-invisible');
+      });
 
-      expect($modals.first()).not.toHaveClass('is-invisible');
-    });
-  });
+      it('can be set to leave the modal open', function() {
+        instance.options.clickOverlayToClose = false;
+        triggerOpen();
+        clickOverlay();
 
-  describe('A modal trigger', function() {
-    beforeEach(function() {
-      before();
-
-      instance = u$.modal($(document.body));
-    });
-    afterEach(function() {
-      after();
-    });
-
-    it('can display a modal when clicked', function() {
-      triggerOpen();
-
-      expect($modals.first()).not.toHaveClass('is-invisible');
-    });
-
-    it('can be removed from the instance', function() {
-      instance.detach($triggers.eq(0));
-      triggerOpen();
-      expect($modals.first()).toHaveClass('is-invisible');
-    });
-
-    it('can trigger a modal when `options.triggerClass` is a function',
-        function() {
-      instance.options.triggerClass = function($trigger) {
-        return $trigger.hasClass('js-triggerModal');
-      };
-
-      $triggers.eq(0).trigger('click');
-      expect($modals.first()).not.toHaveClass('is-invisible');
-    });
-
-    it('can display a modal that has already been loaded', function() {
-      triggerOpen();
-      triggerClose();
-      triggerOpen(3);
-      expect($triggers.eq(3).data('modalindex')).toEqual(0);
+        expect($modals.first()).not.toHaveClass('is-invisible');
+      });
     });
   });
 
@@ -278,26 +305,6 @@ describe('Zepto-Compatible jQuery Modal Box', function() {
         triggerClose();
       }
     }
-
-    it('can be destroyed on close', function() {
-      instance.options.destroyOnClose = true;
-      spyOn($, 'ajax').andCallFake(function(params) {
-        params.success(null, null, {responseText: jsonArr});
-      });
-      
-      openClose(instance);
-      expect(instance.$modals.length).toEqual(0);
-    });
-
-    it('can be closed', function() {
-      spyOn($, 'ajax').andCallFake(function(params) {
-        params.success(null, null, {responseText: jsonArr});
-      });
-
-      openClose(instance);
-
-      expect(instance.$modals.first()).toHaveClass('is-invisible');
-    });
 
     it('can be generated with a JSON Array', function() {
       spyOn($, 'ajax').andCallFake(function(params) {
@@ -385,6 +392,35 @@ describe('Zepto-Compatible jQuery Modal Box', function() {
       instance.hideLoader();
 
       expect(instance.$loader).toBe(null);
+    });
+  });
+
+  describe('Event Emitter', function() {
+    var onShow;
+
+    beforeEach(function() {
+      onShow = jasmine.createSpy('onShow');
+ 
+      instance = u$.modal({
+        events: Backbone.Events
+      });
+    });
+
+    it('can take a Backbone-style events object', function() {
+      instance.on('show', onShow);
+
+      instance.show($modals.first());
+
+      expect(onShow).toHaveBeenCalled();
+    });
+
+    it('can emit a callback set in the options', function() {
+      instance.options.events = null;
+      instance.options.show = onShow;
+
+      instance.show($modals.first());
+      
+      expect(onShow).toHaveBeenCalled();
     });
   });
 });

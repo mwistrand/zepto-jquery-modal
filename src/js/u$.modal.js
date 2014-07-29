@@ -102,11 +102,11 @@ var $overlay,
      */
     triggerClass: 'js-triggerModal'
   },
-  
+  i = 0,
   initialize = function($triggers, options) {
     this.options = $.extend({}, this.options, (options || null));
     this.$body = $(document.body);
-    
+    this._i = ++i;
     // The only event that will always be attached is the
     // "close modal" event.
     this.attachModalEvents();
@@ -262,22 +262,18 @@ var $overlay,
     // this may not be the best name for the method
     render: function($modal, $trigger) {
       this.setCloseLink($modal);
-      this.center($modal).removeClass('is-invisible');
+      this.position($modal).removeClass('is-invisible');
       this.showOverlay();
       this.emit('show', $modal, $trigger, $overlay);
     },
 
-    center: function($modal) {
-      $modal.addClass('centered');
-
-      if (window.jQuery) {
-        $modal.css({
-          marginTop: -$modal.outerHeight()/2 + 'px',
-          marginLeft: -$modal.outerWidth()/2 + 'px',
-        });
-      }
-
-      return $modal;
+    position: function($modal) {
+      return $.cssDetect('transform') ? $modal : $modal.css({
+        left: '50%',
+        marginLeft: -$modal.outerWidth() / 2 + 'px',
+        position: 'absolute',
+        top: $(window).scrollTop() + 100 + 'px'
+      });
     },
 
     show: function($modal, $trigger) {
