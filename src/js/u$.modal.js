@@ -65,6 +65,11 @@ var $overlay,
     events: null,
 
     /**
+     * Does the modal window use fixed positioning?
+     */
+    isFixed: true,
+
+    /**
      * Will this be displayed with the overlay?
      */
     isLightbox: true,
@@ -268,12 +273,21 @@ var $overlay,
     },
 
     position: function($modal) {
-      return $.cssDetect('transform') ? $modal : $modal.css({
-        left: '50%',
-        marginLeft: -$modal.outerWidth() / 2 + 'px',
-        position: 'absolute',
-        top: $(window).scrollTop() + 100 + 'px'
-      });
+      var supportsTranform = $.cssDetect('transform'),
+        top;
+
+      if (!supportsTranform) {
+        $modal.css({
+          left: '50%',
+          marginLeft: -$modal.outerWidth() / 2 + 'px'
+        });
+      }
+
+      if (!this.options.isFixed) {
+        $modal.css('top', $(window).scrollTop() + 100 + 'px');
+      }
+
+      return $modal;
     },
 
     show: function($modal, $trigger) {

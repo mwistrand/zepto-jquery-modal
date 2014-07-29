@@ -57,6 +57,9 @@ For example, `myAppModal:showEvent`.
 `events: null`
 A Backbone style events object that will be integrated with the `modal` object (on instantiation, via `$.extend`). Any such object must implement a `trigger` method in order to function properly. If this is `null` (the default), then a basic internal emitter will be used (and event callbacks specified as options).
 
+`isFixed: true`
+Does the modal window use fixed positioning? **Note: it is up to your external CSS to determine the `position` style.**
+
 `isLightbox: true`
 Will this be displayed with the overlay? **Note: there is only overlay element that is shared between instances.**
 

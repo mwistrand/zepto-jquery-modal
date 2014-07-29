@@ -249,6 +249,19 @@ describe('Zepto-Compatible jQuery Modal Box', function() {
         triggerOpen();
         expect($modals.first()).not.toHaveClass('is-invisible');        
       });
+
+      describe('with absolute positioning', function() {
+        beforeEach(function() {
+          instance.options.isFixed = false;
+          $modals.first().css('position', 'absolute');
+
+          triggerOpen();
+        });
+
+        it('displays it at the top of the current scroll position', function() {
+          expect($modals.first().css('top')).toEqual($(window).scrollTop() + 100 + 'px');
+        });
+      });
     });
   });
 
