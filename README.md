@@ -78,6 +78,9 @@ modals: ['<div />', {
 modals: '<div class="modal"></div>'
 ```
 
+`offset: 100`
+The vertical offset in pixels that the element should be positioned off the top of the screen. **Note: only used when the `isFixed` flag is `false`.**
+
 `overlayParams: '<div class="overlay"></div>'`
 The data that will be used to create the overlay element. Can be an HTML string, or an array of arguments to pass to `$`:
 `overlayParams: ['<div />', {'class': 'overlay'}]`

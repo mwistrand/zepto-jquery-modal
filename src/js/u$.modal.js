@@ -93,6 +93,15 @@ var $overlay,
     modals: null,
 
     /**
+     * The vertical offset in pixels that the modal should be offset from
+     * the top of the screen.
+     *
+     * Since this is only used when the `isFixed` option is set to `false`,
+     * the default for this option is set on the fly, when it's needed.
+     */
+    // offset: 100
+
+    /**
      * The data that will be used to create the overlay element.
      * Can be an HTML string, or an array of arguments to pass to `$`:
      *
@@ -273,8 +282,7 @@ var $overlay,
     },
 
     position: function($modal) {
-      var supportsTranform = $.cssDetect('transform'),
-        top;
+      var supportsTranform = $.cssDetect('transform');
 
       if (!supportsTranform) {
         $modal.css({
@@ -284,7 +292,8 @@ var $overlay,
       }
 
       if (!this.options.isFixed) {
-        $modal.css('top', $(window).scrollTop() + 100 + 'px');
+        $modal.css('top', $(window).scrollTop() +
+            (this.options.offset || 100) + 'px');
       }
 
       return $modal;

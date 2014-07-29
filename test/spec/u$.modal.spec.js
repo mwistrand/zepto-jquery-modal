@@ -254,12 +254,19 @@ describe('Zepto-Compatible jQuery Modal Box', function() {
         beforeEach(function() {
           instance.options.isFixed = false;
           $modals.first().css('position', 'absolute');
-
-          triggerOpen();
         });
 
         it('displays it at the top of the current scroll position', function() {
+          triggerOpen();
+
           expect($modals.first().css('top')).toEqual($(window).scrollTop() + 100 + 'px');
+        });
+
+        it('offsets the modal from the top of the screen', function() {
+          instance.options.offset = 200;
+          triggerOpen();
+
+          expect($modals.first().css('top')).toEqual($(window).scrollTop() + 200 + 'px');
         });
       });
     });
