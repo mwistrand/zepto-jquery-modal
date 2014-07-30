@@ -65,11 +65,6 @@ var $overlay,
     events: null,
 
     /**
-     * Does the modal window use fixed positioning?
-     */
-    isFixed: true,
-
-    /**
      * Will this be displayed with the overlay?
      */
     isLightbox: true,
@@ -96,7 +91,7 @@ var $overlay,
      * The vertical offset in pixels that the modal should be offset from
      * the top of the screen.
      *
-     * Since this is only used when the `isFixed` option is set to `false`,
+     * Since this is only used when the modal's position is not `fixed`,
      * the default for this option is set on the fly, when it's needed.
      */
     // offset: 100
@@ -291,7 +286,7 @@ var $overlay,
         });
       }
 
-      if (!this.options.isFixed) {
+      if ($modal.css('position') !== 'fixed') {
         $modal.css('top', $(window).scrollTop() +
             (this.options.offset || 100) + 'px');
       }

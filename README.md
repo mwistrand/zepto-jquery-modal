@@ -57,9 +57,6 @@ For example, `myAppModal:showEvent`.
 `events: null`
 A Backbone style events object that will be integrated with the `modal` object (on instantiation, via `$.extend`). Any such object must implement a `trigger` method in order to function properly. If this is `null` (the default), then a basic internal emitter will be used (and event callbacks specified as options).
 
-`isFixed: true`
-Does the modal window use fixed positioning? **Note: it is up to your external CSS to determine the `position` style.**
-
 `isLightbox: true`
 Will this be displayed with the overlay? **Note: there is only overlay element that is shared between instances.**
 
@@ -79,7 +76,7 @@ modals: '<div class="modal"></div>'
 ```
 
 `offset: 100`
-The vertical offset in pixels that the element should be positioned off the top of the screen. **Note: only used when the `isFixed` flag is `false`.**
+The vertical offset in pixels that the element should be positioned off the top of the screen. **Note: only used when the CSS position is not `fixed`.**
 
 `overlayParams: '<div class="overlay"></div>'`
 The data that will be used to create the overlay element. Can be an HTML string, or an array of arguments to pass to `$`:

@@ -252,7 +252,6 @@ describe('Zepto-Compatible jQuery Modal Box', function() {
 
       describe('with absolute positioning', function() {
         beforeEach(function() {
-          instance.options.isFixed = false;
           $modals.first().css('position', 'absolute');
         });
 
