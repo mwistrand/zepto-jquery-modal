@@ -116,11 +116,11 @@ var $overlay,
      */
     triggerClass: 'js-triggerModal'
   },
-  i = 0,
+  
   initialize = function($triggers, options) {
     this.options = $.extend({}, this.options, (options || null));
     this.$body = $(document.body);
-    this._i = ++i;
+    
     // The only event that will always be attached is the
     // "close modal" event.
     this.attachModalEvents();
