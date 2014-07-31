@@ -26,16 +26,16 @@ describe('Zepto-Compatible jQuery Modal Box', function() {
     instance.detach();
   }
 
-  function triggerClose(i) {
-    $modals.eq(i || 0).find('.js-closeModal').eq(0).trigger('click');
+  function triggerClose(i, event) {
+    $modals.eq(i || 0).find('.js-closeModal').eq(0).trigger(event || 'click');
   }
 
-  function triggerOpen(i) {
-    $triggers.eq(i || 0).trigger('click');
+  function triggerOpen(i, event) {
+    $triggers.eq(i || 0).trigger(event || 'click');
   }
 
-  function clickOverlay() {
-    $('.js-overlay').trigger('click');
+  function clickOverlay(event) {
+    $('.js-overlay').trigger(event || 'click');
   }
 
   function before() {
@@ -295,6 +295,27 @@ describe('Zepto-Compatible jQuery Modal Box', function() {
         instance.options.clickOverlayToClose = false;
         triggerOpen();
         clickOverlay();
+
+        expect($modals.first()).not.toHaveClass('is-invisible');
+      });
+    });
+
+    describe('when tapped', function() {
+      beforeEach(function() {
+        instance = u$.modal($(document.body));
+      });
+
+      it('can close a modal', function() {
+        triggerOpen();
+        clickOverlay('touchend');
+
+        expect($modals.first()).toHaveClass('is-invisible');
+      });
+
+      it('can be set to leave the modal open', function() {
+        instance.options.clickOverlayToClose = false;
+        triggerOpen();
+        clickOverlay('touchend');
 
         expect($modals.first()).not.toHaveClass('is-invisible');
       });

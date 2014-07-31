@@ -133,7 +133,15 @@ var $overlay,
 
   setEvent = (function() {
     var callbacks = {
-      clickOverlay: function() {
+      clickOverlay: function(e) {
+        // Since the overlay won't be an <a> element and probably
+        // won't have the style `cursor: pointer`, this may not be
+        // necessary as the `click` event won't fire when the overlay
+        // is tapped. I'm invoking the "You ain't gonna need it" pattern...
+        //if (e.type === 'touchend') {
+        //  e.stopPropagation();
+        //}
+
         if ($overlay.data('clickToClose')) {
           this.hide();
         }
@@ -189,6 +197,9 @@ var $overlay,
     attachModalEvents: function() {
       setEvent.call(this, 'close', this.$body, '.js-closeModal');
       setEvent.call(this, 'clickOverlay', this.$body, '.js-overlay');
+
+      // 1
+      setEvent.call(this, 'clickOverlay', this.$body, '.js-overlay', 'touchend');
 
       if (this.options.escapeClose) {
         setEvent.call(this, 'escapeClose', this.$body, null, 'keyup');
